@@ -6,3 +6,4 @@ dist/
 
 verification-*.png
 tmp-video-frames/
+.vercel
