@@ -315,6 +315,12 @@ function App() {
       })
     })
 
+    window.setTimeout(() => {
+      if (!window.location.hash) return
+      const target = document.querySelector(window.location.hash)
+      target?.scrollIntoView({ block: 'start' })
+    }, 100)
+
     return () => {
       ctx.revert()
       gsap.ticker.remove(raf)
@@ -365,7 +371,7 @@ function App() {
         </div>
       </section>
 
-      <section className="scene builder-scene">
+      <section className="scene builder-scene" id="builder">
         <div className="scene-media builder-media" aria-hidden="true">
           <div className="city-continuation">
             <span />
@@ -404,7 +410,7 @@ function App() {
         </div>
       </section>
 
-      <section className="scene closer-scene">
+      <section className="scene closer-scene" id="closer">
         <div className="scene-media closer-media" aria-hidden="true">
           <div className="city-continuation closer-depth">
             <span />

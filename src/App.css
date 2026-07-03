@@ -53,6 +53,10 @@ main {
   background: var(--black);
 }
 
+#work {
+  scroll-margin-top: 96px;
+}
+
 .top-nav {
   position: fixed;
   top: 0;
@@ -641,7 +645,7 @@ footer a:focus-visible {
   }
 
   .hero-scene {
-    min-height: 230vh;
+    min-height: 220vh;
   }
 
   .scene-copy,
@@ -662,19 +666,10 @@ footer a:focus-visible {
     font-size: 24px;
   }
 
-  .hero-person {
-    left: 30vw;
-    width: 70vw;
-  }
-
-  .camera-rig {
-    display: none;
-  }
-
   .work-strip {
     left: 24px;
     right: 24px;
-    top: calc(100vh + 220px);
+    top: calc(100vh + 190px);
     grid-template-columns: 1fr;
   }
 
@@ -706,12 +701,17 @@ footer a:focus-visible {
   .service-panel {
     left: 24px;
     right: 24px;
+    bottom: 5vh;
     width: auto;
     transform: none;
   }
 }
 
 @media (max-width: 560px) {
+  #work {
+    scroll-margin-top: 78px;
+  }
+
   .top-nav {
     padding: 20px 18px;
     font-size: 11px;
@@ -720,8 +720,16 @@ footer a:focus-visible {
   .scene-copy,
   .scene-copy.centered {
     left: 18px;
-    top: 16vh;
+    top: 14vh;
     width: calc(100vw - 36px);
+  }
+
+  .hero-scene {
+    min-height: 225vh;
+  }
+
+  .hero-scene .scene-copy {
+    top: 13vh;
   }
 
   .scene-kicker {
@@ -731,28 +739,29 @@ footer a:focus-visible {
   }
 
   .scene-title {
-    font-size: clamp(56px, 19vw, 88px);
+    font-size: clamp(52px, 18vw, 78px);
   }
 
   .scene-subtitle {
-    font-size: 21px;
+    max-width: 330px;
+    font-size: 20px;
   }
 
-  .hero-person {
-    left: 8vw;
-    bottom: 18vh;
-    width: 94vw;
-    min-width: 0;
+  .future-city-canvas {
+    transform: scale(1.05);
+    transform-origin: center;
   }
 
-  .studio-light {
-    width: 58px;
-    height: 58px;
+  .city-vignette {
+    background:
+      linear-gradient(90deg, rgba(7, 6, 5, 0.72), rgba(7, 6, 5, 0.06) 50%, rgba(7, 6, 5, 0.44)),
+      linear-gradient(180deg, rgba(7, 6, 5, 0.2), rgba(7, 6, 5, 0.04) 42%, rgba(7, 6, 5, 0.7));
   }
 
   .work-strip {
     left: 18px;
     right: 18px;
+    top: calc(100vh + 170px);
   }
 
   .work-card {
@@ -775,21 +784,65 @@ footer a:focus-visible {
 
   .builder-person,
   .closer-person {
-    right: -7vw;
-    bottom: 5vh;
+    right: -12vw;
+    bottom: 13vh;
+    width: 78vw;
+    min-width: 0;
+    opacity: 0.68;
+  }
+
+  .monitor-main {
+    left: 8vw;
+    top: 34vh;
     width: 86vw;
+    height: 34vh;
+  }
+
+  .city-continuation span {
+    width: 54px;
+    opacity: 0.28;
+  }
+
+  .service-panel {
+    left: 18px;
+    right: 18px;
+    bottom: 5vh;
   }
 
   .service-line {
     grid-template-columns: 42px 1fr;
     gap: 12px;
+    padding: 14px 0;
+  }
+
+  .service-line p {
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  .gallery-wall {
+    width: 46vw;
+    height: 50vh;
+    opacity: 0.58;
   }
 
   .final-scene {
-    padding: 16vh 18px 6vh;
+    min-height: 86vh;
+    padding: 14vh 18px 6vh;
   }
 
   .final-scene h2 {
-    font-size: clamp(46px, 14vw, 74px);
+    font-size: clamp(42px, 13vw, 64px);
+    line-height: 0.94;
+  }
+
+  .final-actions a {
+    width: 100%;
+  }
+
+  footer {
+    display: grid;
+    gap: 16px;
+    margin-top: 64px;
   }
 }
