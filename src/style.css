@@ -327,7 +327,7 @@ body {
 
 .record-body {
   display: grid;
-  grid-template-columns: minmax(0, 640px) 200px;
+  grid-template-columns: minmax(0, 640px) 220px;
   gap: clamp(24px, 3vw, 48px);
   align-items: start;
 }
@@ -351,9 +351,9 @@ body {
 .record-portrait img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 9 / 16;
   object-fit: cover;
-  object-position: 50% 22%;
+  object-position: 50% 14%;
   filter: grayscale(.85) contrast(1.06) brightness(.92);
 }
 .record-portrait figcaption {
