@@ -324,8 +324,9 @@ body {
 .finale-links {
   margin-top: 7vh;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(28px, 5vw, 72px);
+  gap: clamp(20px, 3.6vw, 56px);
 }
 .finale-links a {
   font-family: var(--display);
@@ -348,6 +349,128 @@ body {
   letter-spacing: .18em;
   opacity: .65;
 }
+
+/* ══════════ BOOK-A-CALL TRANSMISSION FORM ══════════ */
+
+#call-modal {
+  position: fixed; inset: 0;
+  z-index: 60;
+  display: none;
+  align-items: center; justify-content: center;
+}
+#call-modal.open { display: flex; }
+
+.modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(5,4,3,.72);
+  backdrop-filter: blur(6px);
+}
+
+.modal-panel {
+  position: relative;
+  width: min(480px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: clamp(26px, 4vw, 40px);
+  background: rgba(10,8,7,.94);
+  border: 1px solid rgba(246,239,230,.16);
+  box-shadow: 0 0 60px rgba(255,106,47,.12);
+  animation: panel-in .45s cubic-bezier(.2,.9,.25,1) both;
+}
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: 0;
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .18em;
+  color: var(--dust);
+  cursor: none;
+  padding: 6px;
+}
+.modal-close:hover { color: var(--ink); }
+
+.modal-title {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(18px, 2vw, 24px);
+  letter-spacing: .3em;
+  margin-top: 4px;
+}
+.modal-sub {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: .03em;
+  opacity: .8;
+}
+
+#call-form { margin-top: 10px; }
+#call-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+#call-form label {
+  display: block;
+  margin-top: 20px;
+  font-size: 10px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+#call-form input:not(.hp), #call-form textarea {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(246,239,230,.22);
+  padding: 8px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .02em;
+  color: var(--ink);
+  border-radius: 0;
+  resize: vertical;
+}
+#call-form input:focus, #call-form textarea:focus {
+  outline: none;
+  border-bottom-color: var(--ember);
+}
+
+.modal-send {
+  margin-top: 28px;
+  width: 100%;
+  background: none;
+  border: 1px solid rgba(255,106,47,.55);
+  border-radius: 999px;
+  padding: 13px 20px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  color: var(--ember-soft);
+  cursor: none;
+  transition: background .3s ease, color .3s ease, border-color .3s ease, opacity .3s ease;
+}
+.modal-send:hover:not(:disabled) {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: var(--night-0);
+}
+.modal-send:disabled { opacity: .45; }
+
+.form-status {
+  margin-top: 16px;
+  min-height: 16px;
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--dust);
+}
+.form-status.ok { color: var(--signal); }
+.form-status.err { color: var(--ember-soft); }
 
 /* ══════════ PRELOADER ══════════ */
 

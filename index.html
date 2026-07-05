@@ -141,10 +141,39 @@
     <nav class="finale-links">
       <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer" data-hover data-shape="cross" data-scramble>LINKEDIN</a>
       <a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer" data-hover data-shape="delta" data-scramble>INSTAGRAM</a>
-      <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer" data-hover data-shape="ring" data-scramble>BOOK A CALL</a>
+      <a href="https://www.facebook.com/on3n3xus" target="_blank" rel="noreferrer" data-hover data-shape="diamond" data-scramble>FACEBOOK</a>
+      <a href="#book" id="book-call" data-hover data-shape="ring" data-scramble>BOOK A CALL</a>
     </nav>
     <div class="finale-foot">DANILO OJEDA — AI SYSTEMS FOR CRE — EST. 2026</div>
   </section>
+
+  <!-- ══════════ BOOK-A-CALL TRANSMISSION FORM ══════════ -->
+  <div id="call-modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Book a call">
+      <button class="modal-close" type="button" data-close data-hover>[ X ]</button>
+      <div class="beat-label">////// Transmission</div>
+      <h3 class="modal-title" data-scramble>BOOK A CALL</h3>
+      <p class="modal-sub">Tell me what you're building. I reply within 24 hours.</p>
+      <form id="call-form" novalidate>
+        <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label>Name
+          <input required name="name" type="text" autocomplete="name" maxlength="120">
+        </label>
+        <label>Email
+          <input required name="email" type="email" autocomplete="email" maxlength="200">
+        </label>
+        <label>Company
+          <input name="company" type="text" autocomplete="organization" maxlength="160">
+        </label>
+        <label>What are we building?
+          <textarea required name="message" rows="4" maxlength="2000"></textarea>
+        </label>
+        <button class="modal-send" type="submit" data-hover>SEND TRANSMISSION</button>
+        <div class="form-status" id="form-status" role="status"></div>
+      </form>
+    </div>
+  </div>
 
   <!-- ══════════ PRELOADER ══════════ -->
   <div id="loader">

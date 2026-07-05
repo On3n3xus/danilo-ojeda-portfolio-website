@@ -28,6 +28,17 @@ for (const [name, p] of stops) {
   await page.screenshot({ path: `${OUT}/${name}.png` })
 }
 
+// book-a-call modal (no real submit — that would email Danilo)
+await page.evaluate(() => document.getElementById('book-call').click())
+await page.waitForTimeout(900)
+await page.fill('#call-form input[name="name"]', 'Jane Broker')
+await page.fill('#call-form input[name="email"]', 'jane@example.com')
+await page.fill('#call-form input[name="company"]', 'Acme CRE')
+await page.fill('#call-form textarea[name="message"]', 'Voice agent for our leasing line.')
+await page.screenshot({ path: `${OUT}/06b-call-modal.png` })
+await page.keyboard.press('Escape')
+await page.waitForTimeout(400)
+
 // mobile pass
 await page.setViewportSize({ width: 390, height: 844 })
 await page.evaluate(() => window.__flight.setProgress(0))

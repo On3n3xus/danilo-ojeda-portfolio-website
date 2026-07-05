@@ -152,11 +152,15 @@ const Sound = {
 };
 
 /* ── virtual scroll ──────────────────────────────────────────── */
+let modalOpen = false;                 // the call form freezes the flight
+const isTyping = (e: Event) =>
+  !!(e.target as HTMLElement | null)?.closest?.("input, textarea, select");
+
 const Scroll = {
   target: 0, value: 0, velocity: 0, enabled: false,
   attach() {
     addEventListener("wheel", (e) => {
-      if (!this.enabled) return;
+      if (!this.enabled || modalOpen) return;
       e.preventDefault();
       this.target = clamp(this.target + e.deltaY * 0.00021, 0, 1);
     }, { passive: false });
@@ -164,14 +168,14 @@ const Scroll = {
     let touchY: number | null = null;
     addEventListener("touchstart", (e) => { touchY = e.touches[0].clientY; }, { passive: true });
     addEventListener("touchmove", (e) => {
-      if (!this.enabled || touchY == null) return;
+      if (!this.enabled || modalOpen || touchY == null) return;
       const y = e.touches[0].clientY;
       this.target = clamp(this.target + (touchY - y) * 0.0011, 0, 1);
       touchY = y;
     }, { passive: true });
 
     addEventListener("keydown", (e) => {
-      if (!this.enabled) return;
+      if (!this.enabled || modalOpen || isTyping(e)) return;
       const step = ({ ArrowDown: 0.03, PageDown: 0.12, " ": 0.12, ArrowUp: -0.03, PageUp: -0.12, Home: -2, End: 2 } as Record<string, number>)[e.key];
       if (step) { e.preventDefault(); this.target = clamp(this.target + step, 0, 1); }
     });
@@ -596,6 +600,11 @@ function shapePoints(kind: string) {
       const A: [number, number] = [0, -0.52], B: [number, number] = [-0.5, 0.42], C: [number, number] = [0.5, 0.42];
       const [p1, p2] = e === 0 ? [A, B] : e === 1 ? [B, C] : [C, A];
       x = lerp(p1[0], p2[0], u); y = lerp(p1[1], p2[1], u);
+    } else if (kind === "diamond") {
+      const e = i % 4, u = (t * 4) % 1;
+      const P: [number, number][] = [[0, -0.52], [0.44, 0], [0, 0.52], [-0.44, 0]];
+      const p1 = P[e], p2 = P[(e + 1) % 4];
+      x = lerp(p1[0], p2[0], u); y = lerp(p1[1], p2[1], u);
     } else {                            // ring
       const a = t * Math.PI * 2;
       const rr = 0.42 + (i % 5 === 0 ? 0.06 : 0);
@@ -607,7 +616,7 @@ function shapePoints(kind: string) {
 }
 const shapes: Record<string, [number, number][]> = {
   slab: shapePoints("slab"), cross: shapePoints("cross"),
-  delta: shapePoints("delta"), ring: shapePoints("ring"),
+  delta: shapePoints("delta"), diamond: shapePoints("diamond"), ring: shapePoints("ring"),
 };
 let activeShape = "slab";
 
@@ -677,6 +686,69 @@ $$(".finale-links a").forEach((a) => {
 });
 $$("[data-rail]").forEach((a) => {
   a.addEventListener("mouseenter", () => Sound.tick());
+});
+
+/* ── book-a-call transmission form ───────────────────────────── */
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/on3n3xus@gmail.com";
+const callModal = $("#call-modal");
+const callForm = $<HTMLFormElement>("#call-form");
+const formStatus = $("#form-status");
+const sendBtn = $<HTMLButtonElement>(".modal-send");
+
+function openModal() {
+  modalOpen = true;
+  callModal.classList.add("open");
+  callModal.setAttribute("aria-hidden", "false");
+  getScramble($(".modal-title")).play(500);
+  Sound.tick();
+  setTimeout(() => $<HTMLInputElement>('#call-form input[name="name"]')?.focus(), 480);
+}
+
+function closeModal() {
+  modalOpen = false;
+  callModal.classList.remove("open");
+  callModal.setAttribute("aria-hidden", "true");
+}
+
+$("#book-call").addEventListener("click", (e) => {
+  e.preventDefault();
+  openModal();
+});
+$$("#call-modal [data-close]").forEach((el) => el.addEventListener("click", closeModal));
+addEventListener("keydown", (e) => { if (e.key === "Escape" && modalOpen) closeModal(); });
+
+callForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!callForm.reportValidity()) return;
+  const data = Object.fromEntries(new FormData(callForm).entries());
+  if (data._honey) return;                       // bot filled the honeypot
+
+  sendBtn.disabled = true;
+  formStatus.className = "form-status";
+  formStatus.textContent = "// sending transmission…";
+  try {
+    const res = await fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        name: data.name, email: data.email,
+        company: data.company || "—", message: data.message,
+        _subject: "New call request — daniloojeda.com",
+        _template: "table",
+      }),
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    formStatus.className = "form-status ok";
+    getScramble(formStatus).swap("// transmission received. Talk soon.", 500);
+    callForm.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input:not(.hp), textarea")
+      .forEach((el) => { el.value = ""; });
+    setTimeout(closeModal, 2600);
+  } catch {
+    formStatus.className = "form-status err";
+    formStatus.textContent = "// signal lost — try again, or email on3n3xus@gmail.com";
+  } finally {
+    sendBtn.disabled = false;
+  }
 });
 
 /* ── telemetry ticker ────────────────────────────────────────── */
