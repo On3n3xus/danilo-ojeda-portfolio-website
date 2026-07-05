@@ -351,9 +351,9 @@ body {
 .record-portrait img {
   display: block;
   width: 100%;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 1 / 2.2;
   object-fit: cover;
-  object-position: 50% 14%;
+  object-position: 50% 10%;
   filter: grayscale(.85) contrast(1.06) brightness(.92);
 }
 .record-portrait figcaption {
