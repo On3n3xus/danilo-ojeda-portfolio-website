@@ -1,13 +1,164 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>danilo-ojeda-portfolio-website</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Danilo Ojeda — AI Builder</title>
+  <meta name="description" content="AI systems for commercial real estate — voice agents, lead engines, and the automation behind them.">
+  <link rel="canonical" href="https://daniloojeda.com/">
+  <meta property="og:title" content="Danilo Ojeda — AI Builder">
+  <meta property="og:description" content="AI systems for commercial real estate — voice agents, lead engines, and the automation behind them.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://daniloojeda.com/">
+  <meta property="og:image" content="/danilo-headshot.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Danilo Ojeda — AI Builder">
+  <meta name="twitter:image" content="/danilo-headshot.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- SVG filter defs: chromatic aberration used during act transitions -->
+  <svg class="svg-defs" aria-hidden="true">
+    <defs>
+      <filter id="aberration" x="-5%" y="-5%" width="110%" height="110%">
+        <feOffset in="SourceGraphic" dx="0" dy="0" result="r0"/>
+        <feComponentTransfer in="r0" result="red"><feFuncG type="linear" slope="0"/><feFuncB type="linear" slope="0"/></feComponentTransfer>
+        <feOffset in="SourceGraphic" dx="0" dy="0" result="g0"/>
+        <feComponentTransfer in="g0" result="green"><feFuncR type="linear" slope="0"/><feFuncB type="linear" slope="0"/></feComponentTransfer>
+        <feOffset in="SourceGraphic" dx="0" dy="0" result="b0"/>
+        <feComponentTransfer in="b0" result="blue"><feFuncR type="linear" slope="0"/><feFuncG type="linear" slope="0"/></feComponentTransfer>
+        <feBlend in="red" in2="green" mode="screen" result="rg"/>
+        <feBlend in="rg" in2="blue" mode="screen"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- ══════════ STAGE — the camera flight through the city ══════════ -->
+  <div id="stage">
+    <div id="city-mount"></div>
+    <div id="glow-vignette"></div>
+    <div id="whiteout"></div>
+  </div>
+
+  <canvas id="fx"></canvas>
+  <div id="grain"></div>
+
+  <!-- ══════════ HUD ══════════ -->
+  <div id="hud">
+    <div class="hud-tl">
+      <div class="logo" data-hover>DANILO OJEDA<sup>AI</sup></div>
+      <div class="hud-meta">
+        <div class="hud-line scramble-on-enter">// AI Builder © 2026</div>
+        <div class="hud-line scramble-on-enter">Danilo Ojeda. All Rights Reserved.</div>
+      </div>
+    </div>
+
+    <div class="hud-tr">
+      <div class="hud-label scramble-on-enter">////// Manifesto</div>
+      <p class="manifesto scramble-on-enter">I build AI systems for commercial real estate — voice agents, lead engines, and the automation behind them.</p>
+    </div>
+
+    <div class="hud-bl">
+      <div class="hint scramble-on-enter" id="scroll-hint">Scroll down to enter the city.</div>
+      <button class="sound-toggle" id="sound-toggle" data-hover aria-pressed="false">(♪) Sound: OFF</button>
+    </div>
+
+    <div class="hud-br">
+      <div class="meter-line">ELEV <span id="elev-val">+0000M</span></div>
+      <div class="meter-line">SIG <span id="sig-val">99.97%</span></div>
+    </div>
+
+    <div class="hud-rail">
+      <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer" data-hover data-rail>IN</a>
+      <a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer" data-hover data-rail>IG</a>
+      <a href="https://www.facebook.com/on3n3xus" target="_blank" rel="noreferrer" data-hover data-rail>FB</a>
+    </div>
+  </div>
+
+  <!-- telemetry callouts pinned over the opening skyline -->
+  <div id="callouts">
+    <div class="callout" style="--cx:33%; --cy:30%">
+      <span class="callout-anchor">+</span>
+      <span class="callout-tag">V2<em id="co-1">CALLS: 42</em></span>
+    </div>
+    <div class="callout" style="--cx:62%; --cy:22%">
+      <span class="callout-anchor">+</span>
+      <span class="callout-tag">L7<em id="co-2">SCORE: 7.05</em></span>
+    </div>
+    <div class="callout callout-block" style="--cx:76%; --cy:44%">
+      <div class="callout-data">
+        <div>PIPE&nbsp;&nbsp;SEG</div>
+        <div>+++</div>
+        <div>LEADS: <span id="co-leads">84</span></div>
+        <div>ACTV: <span id="co-actv">2</span></div>
+        <div>ELEV: 09</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BEATS — copy that rides the flight ══════════ -->
+  <section class="beat beat-hero" data-beat="hero">
+    <div class="beat-label">////// (01) Portfolio</div>
+    <h1 class="beat-title" data-scramble>PROOF OF WORK<span class="accent">.</span></h1>
+    <p class="beat-sub">AI systems for commercial real estate.</p>
+  </section>
+
+  <section class="beat" data-beat="within">
+    <div class="beat-label">////// (02) What I do</div>
+    <h2 class="beat-title" data-scramble>INSIDE THE MACHINE</h2>
+    <p class="beat-sub">Voice agents. Lead engines. CRM automation — wired to revenue.</p>
+  </section>
+
+  <section class="beat beat-artifact" data-beat="a1">
+    <div class="beat-index">01 / 03</div>
+    <h3 class="beat-name" data-scramble>WYN INTELLIGENCE</h3>
+    <div class="beat-rule"></div>
+    <p class="beat-sub">Broker command center — CRM, listings, campaigns, one dashboard.</p>
+  </section>
+
+  <section class="beat beat-artifact" data-beat="a2">
+    <div class="beat-index">02 / 03</div>
+    <h3 class="beat-name" data-scramble>MIGUEL CLOSES</h3>
+    <div class="beat-rule"></div>
+    <p class="beat-sub">Full site + GoHighLevel pipeline that captures, nurtures, closes.</p>
+    <a class="beat-link" href="https://miguelcloses.com" target="_blank" rel="noreferrer" data-hover>VISIT ↗</a>
+  </section>
+
+  <section class="beat beat-artifact" data-beat="a3">
+    <div class="beat-index">03 / 03</div>
+    <h3 class="beat-name" data-scramble>MICROCOMMIT</h3>
+    <div class="beat-rule"></div>
+    <p class="beat-sub">iOS habit app with AI coaching, streaks, and community.</p>
+  </section>
+
+  <section class="beat beat-finale" data-beat="finale">
+    <div class="beat-label">////// (04) Work with me</div>
+    <h2 class="beat-title" data-scramble>THE PIPELINE NEVER SLEEPS.</h2>
+    <nav class="finale-links">
+      <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer" data-hover data-shape="cross" data-scramble>LINKEDIN</a>
+      <a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer" data-hover data-shape="delta" data-scramble>INSTAGRAM</a>
+      <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer" data-hover data-shape="ring" data-scramble>BOOK A CALL</a>
+    </nav>
+    <div class="finale-foot">DANILO OJEDA — AI SYSTEMS FOR CRE — EST. 2026</div>
+  </section>
+
+  <!-- ══════════ PRELOADER ══════════ -->
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="loader-logo">DANILO OJEDA<sup>AI</sup></div>
+      <div class="loader-count" id="loader-count">000</div>
+      <div class="loader-bar"><i id="loader-bar-fill"></i></div>
+      <div class="loader-status" id="loader-status">// booting voice agents…</div>
+      <button class="loader-enter" id="loader-enter" data-hover>CLICK TO ENTER</button>
+    </div>
+  </div>
+
+  <div id="cursor"><i></i></div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
 </html>

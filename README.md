@@ -1,32 +1,32 @@
-# React + TypeScript + Vite
+# daniloojeda.com — Danilo Ojeda, AI Builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A cinematic, virtual-scroll portfolio. There is no scrollbar — wheel / touch / keys
+scrub a 0→1 progress value that flies a Three.js camera through a night city in
+four acts:
 
-Currently, two official plugins are available:
+1. **Skyline** — hero: "Proof of Work." + live telemetry callouts
+2. **Street** — what I do: voice agents, lead engines, CRM automation
+3. **The Work** — Wyn Intelligence · Miguel Closes · MicroCommit
+4. **Signal** — contact: LinkedIn / Instagram / book a call, with a particle
+   swarm that morphs on link hover
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Extras: preloader gate ("CLICK TO ENTER"), scramble/glitch text, chromatic-aberration
+act transitions, generated ambient audio (wind + drone, no audio files), film grain,
+ember particles, custom cursor. Honors `prefers-reduced-motion`.
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Vite + TypeScript + Three.js. No framework, no animation libraries — the whole
+engine lives in [src/main.ts](src/main.ts), styles in [src/style.css](src/style.css),
+markup in [index.html](index.html).
 
-## Expanding the Oxlint configuration
+## Commands
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm run dev       # dev server
+npm run build     # type-check + production build → dist/
+npm run lint      # oxlint
+node qa-flight.mjs  # headless Playwright QA: screenshots every act (desktop + mobile)
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+`window.__flight.setProgress(p)` scrubs the flight from the console / tests.
