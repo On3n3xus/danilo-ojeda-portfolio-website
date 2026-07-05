@@ -162,7 +162,7 @@ const Scroll = {
     addEventListener("wheel", (e) => {
       if (!this.enabled || modalOpen) return;
       e.preventDefault();
-      this.target = clamp(this.target + e.deltaY * 0.00021, 0, 1);
+      this.target = clamp(this.target + e.deltaY * 0.00018, 0, 1);
     }, { passive: false });
 
     let touchY: number | null = null;
@@ -170,7 +170,7 @@ const Scroll = {
     addEventListener("touchmove", (e) => {
       if (!this.enabled || modalOpen || touchY == null) return;
       const y = e.touches[0].clientY;
-      this.target = clamp(this.target + (touchY - y) * 0.0011, 0, 1);
+      this.target = clamp(this.target + (touchY - y) * 0.00095, 0, 1);
       touchY = y;
     }, { passive: true });
 
@@ -216,10 +216,11 @@ const FLIGHT: { p: number; pos: [number, number, number]; look: [number, number,
   { p: 0.00, pos: [0, 26, 64],   look: [0, 10, -16] },   // aerial skyline
   { p: 0.26, pos: [0, 15, 42],   look: [0, 8, -18] },    // diving toward the seam
   { p: 0.34, pos: [0, 5, 26],    look: [0, 5.5, -20] },  // entering the canyon
-  { p: 0.56, pos: [0, 3.2, -2],  look: [0, 6, -34] },    // deep in the street
-  { p: 0.64, pos: [2.5, 6, -8],  look: [10, 15, -24] },  // turning to the spire
-  { p: 0.78, pos: [3, 13, -11],  look: [10, 21, -24] },  // riding up the rings
-  { p: 0.90, pos: [-2, 28, 4],   look: [7, 26, -26] },   // lifting off
+  { p: 0.52, pos: [0, 3.2, -2],  look: [0, 6, -34] },    // deep in the street
+  { p: 0.60, pos: [2.5, 6, -8],  look: [10, 15, -24] },  // turning to the spire
+  { p: 0.72, pos: [3, 13, -11],  look: [10, 21, -24] },  // riding up the rings
+  { p: 0.80, pos: [8, 19, 6],    look: [14, 12, -22] },  // rooftop pan — the record
+  { p: 0.86, pos: [-2, 28, 4],   look: [7, 26, -26] },   // lifting off
   { p: 1.00, pos: [-6, 42, 22],  look: [5, 34, -30] },   // among the stars
 ];
 
@@ -401,7 +402,7 @@ const City = {
     // haze thickens in the canyon, thins among the stars
     if (this.fog) {
       this.fog.density =
-        0.014 + Math.sin(clamp(map(p, 0.3, 0.6, 0, 1), 0, 1) * Math.PI) * 0.014 - map(p, 0.78, 1, 0, 0.006);
+        0.014 + Math.sin(clamp(map(p, 0.3, 0.58, 0, 1), 0, 1) * Math.PI) * 0.014 - map(p, 0.86, 1, 0, 0.006);
     }
 
     this.cars.forEach((car, index) => {
@@ -456,7 +457,7 @@ function updateSpike(now: number) {
 }
 
 /* ── timeline: beat windows, HUD per act ─────────────────────── */
-/* skyline [0,.26] · street [.26,.56] · the work [.56,.78] · signal [.78,1] */
+/* skyline [0,.26] · street [.26,.52] · the work [.52,.72] · the record [.72,.86] · signal [.86,1] */
 type Win = { el: HTMLElement; in0: number; in1: number; out0: number; out1: number; seen: boolean; hasLink: boolean };
 const beat = (name: string, in0: number, in1: number, out0: number, out1: number): Win => {
   const el = $(`[data-beat="${name}"]`);
@@ -464,20 +465,22 @@ const beat = (name: string, in0: number, in1: number, out0: number, out1: number
 };
 const beats: Record<string, Win> = {
   hero:   beat("hero",   -1,    -1,    0.06,  0.12),
-  within: beat("within",  0.30,  0.34,  0.46,  0.50),
-  a1:     beat("a1",      0.565, 0.585, 0.625, 0.645),
-  a2:     beat("a2",      0.645, 0.665, 0.705, 0.72),
-  a3:     beat("a3",      0.72,  0.74,  0.77,  0.785),
-  finale: beat("finale",  0.82,  0.87,  2,     3),
+  within: beat("within",  0.30,  0.34,  0.44,  0.48),
+  a1:     beat("a1",      0.525, 0.545, 0.575, 0.595),
+  a2:     beat("a2",      0.595, 0.615, 0.645, 0.66),
+  a3:     beat("a3",      0.66,  0.675, 0.70,  0.715),
+  record: beat("record",  0.73,  0.77,  0.83,  0.86),
+  finale: beat("finale",  0.875, 0.92,  2,     3),
 };
 beats.hero.seen = true;            // scrambled manually at the enter gate
 
 const boundaries = [
   { at: 0.26,  fired: 0, strength: 1 },     // skyline → street
-  { at: 0.56,  fired: 0, strength: 0.9 },   // street → the work
-  { at: 0.78,  fired: 0, strength: 1 },     // the work → signal
-  { at: 0.645, fired: 0, strength: 0.35 },  // artifact 1 → 2 (micro)
-  { at: 0.7185, fired: 0, strength: 0.35 }, // artifact 2 → 3 (micro)
+  { at: 0.52,  fired: 0, strength: 0.9 },   // street → the work
+  { at: 0.72,  fired: 0, strength: 1 },     // the work → the record
+  { at: 0.86,  fired: 0, strength: 0.9 },   // the record → signal
+  { at: 0.595, fired: 0, strength: 0.35 },  // artifact 1 → 2 (micro)
+  { at: 0.6575, fired: 0, strength: 0.35 }, // artifact 2 → 3 (micro)
 ];
 
 const hudTR = $(".hud-tr");
@@ -530,7 +533,7 @@ function updateTimeline(now: number) {
   // act-aware HUD
   hudTR.style.opacity = map(p, 0.1, 0.2, 1, 0).toFixed(3);
   callouts.style.opacity = (Scroll.enabled ? map(p, 0.12, 0.2, 1, 0) : 0).toFixed(3);
-  glowVignette.style.opacity = (Math.sin(clamp(map(p, 0.34, 0.78, 0, 1), 0, 1) * Math.PI) * 0.85).toFixed(3);
+  glowVignette.style.opacity = (Math.sin(clamp(map(p, 0.34, 0.72, 0, 1), 0, 1) * Math.PI) * 0.85).toFixed(3);
 
   // scroll hint swaps to end-of-transmission near the bottom
   if (p > 0.9 && hintMode === 0) { hintMode = 1; getScramble(hintEl).swap("// End of transmission."); }
@@ -629,7 +632,7 @@ function drawParticles() {
 
   // embers drift up from the streets
   fctx.globalCompositeOperation = "source-over";
-  const emberAlpha = map(p, 0.735, 0.8, 1, 0.25);     // calmer in the signal
+  const emberAlpha = map(p, 0.84, 0.89, 1, 0.25);     // calmer in the signal
   for (const f of embers) {
     f.y -= f.vy * f.z * speedMul * (REDUCED ? 0.5 : 1);
     f.ph += 0.006;
@@ -644,7 +647,7 @@ function drawParticles() {
   }
 
   // swarm (signal act only)
-  const swarmK = smooth(map(p, 0.76, 0.84, 0, 1));
+  const swarmK = smooth(map(p, 0.86, 0.92, 0, 1));
   if (swarmK > 0.001) {
     fctx.globalCompositeOperation = "lighter";
     const cx = 0.5 * W, cy = 0.40 * H;

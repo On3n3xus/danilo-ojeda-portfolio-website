@@ -313,6 +313,51 @@ body {
 }
 .beat-link:hover { opacity: 1; border-bottom-color: var(--ember-soft); }
 
+.beat-record {
+  left: var(--hud-pad); top: 50%;
+  transform: translateY(-50%);
+  max-width: min(640px, 72vw);
+}
+.beat-record .beat-title { letter-spacing: .38em; }
+
+.record-ledger {
+  margin-top: 30px;
+  border-top: 1px solid rgba(246,239,230,.18);
+}
+.record-row {
+  display: grid;
+  grid-template-columns: 74px minmax(150px, 190px) 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(246,239,230,.12);
+}
+.r-years {
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  color: var(--ember-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.r-co {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.r-role {
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--dust);
+}
+.record-foot {
+  margin-top: 18px;
+  font-size: 10px;
+  letter-spacing: .18em;
+  opacity: .6;
+}
+
 .beat-finale {
   left: 50%; top: 50%;
   transform: translate(-50%, -50%);
@@ -629,6 +674,16 @@ body.touch, body.touch * { cursor: auto !important; }
   #callouts .callout-block { display: none; }
   .beat-hero { max-width: 86vw; }
   .beat-hero .beat-title { letter-spacing: .12em; white-space: normal; }
+  .beat-record { max-width: 86vw; }
+  .record-row {
+    grid-template-columns: 62px 1fr;
+    grid-template-areas: "years co" "years role";
+    row-gap: 2px;
+  }
+  .r-years { grid-area: years; }
+  .r-co { grid-area: co; }
+  .r-role { grid-area: role; }
+  .record-foot { font-size: 9px; letter-spacing: .12em; }
   .beat-artifact {
     right: 50%;
     transform: translate(50%, -50%);

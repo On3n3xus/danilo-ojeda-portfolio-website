@@ -17,10 +17,11 @@ await page.screenshot({ path: `${OUT}/01-hero.png` })
 
 const stops = [
   ['02-street-within', 0.38],
-  ['03-work-a1', 0.605],
-  ['04-work-a2', 0.675],
-  ['05-work-a3', 0.755],
-  ['06-finale', 0.93],
+  ['03-work-a1', 0.56],
+  ['04-work-a2', 0.625],
+  ['05-work-a3', 0.685],
+  ['05b-record', 0.795],
+  ['06-finale', 0.95],
 ]
 for (const [name, p] of stops) {
   await page.evaluate((v) => window.__flight.setProgress(v), p)
@@ -44,10 +45,13 @@ await page.setViewportSize({ width: 390, height: 844 })
 await page.evaluate(() => window.__flight.setProgress(0))
 await page.waitForTimeout(2500)
 await page.screenshot({ path: `${OUT}/07-mobile-hero.png` })
-await page.evaluate(() => window.__flight.setProgress(0.675))
+await page.evaluate(() => window.__flight.setProgress(0.625))
 await page.waitForTimeout(2800)
 await page.screenshot({ path: `${OUT}/08-mobile-a2.png` })
-await page.evaluate(() => window.__flight.setProgress(0.93))
+await page.evaluate(() => window.__flight.setProgress(0.795))
+await page.waitForTimeout(2800)
+await page.screenshot({ path: `${OUT}/08b-mobile-record.png` })
+await page.evaluate(() => window.__flight.setProgress(0.95))
 await page.waitForTimeout(2800)
 await page.screenshot({ path: `${OUT}/09-mobile-finale.png` })
 
