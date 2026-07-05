@@ -327,13 +327,14 @@ body {
 
 .record-body {
   display: grid;
-  grid-template-columns: minmax(0, 640px) 220px;
+  grid-template-columns: minmax(0, 640px) auto;
   gap: clamp(24px, 3vw, 48px);
   align-items: start;
 }
 
 .record-portrait {
   position: relative;
+  width: min(170px, 15.5vh);          /* full-length photo, scaled to fit short screens */
   margin-top: 30px;
   padding: 9px;
   border: 1px solid rgba(246,239,230,.18);
@@ -350,10 +351,7 @@ body {
 .record-portrait::after { bottom: -8px; right: -6px; }
 .record-portrait img {
   display: block;
-  width: 100%;
-  aspect-ratio: 1 / 2.2;
-  object-fit: cover;
-  object-position: 50% 10%;
+  width: 100%;                        /* natural ratio — head to vest buttons */
   filter: grayscale(.85) contrast(1.06) brightness(.92);
 }
 .record-portrait figcaption {
@@ -783,6 +781,14 @@ body.touch, body.touch * { cursor: auto !important; }
   .beat-title, .beat-title[data-scramble] { letter-spacing: .2em; text-indent: .2em; white-space: normal; }
   .beat-name, .beat-name[data-scramble] { letter-spacing: .18em; white-space: normal; }
   .hud-br { display: none; }
+}
+
+@media (max-height: 800px) {
+  .hud-meta { display: none; }               /* reclaim headroom for the record act */
+  .record-row { padding: 6px 0; }
+  .record-portrait { margin-top: 24px; }
+  .record-foot { display: none; }
+  .beat-record .beat-sub { margin-top: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
