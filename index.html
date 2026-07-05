@@ -118,6 +118,7 @@
     <h3 class="beat-name" data-scramble>WYN INTELLIGENCE</h3>
     <div class="beat-rule"></div>
     <p class="beat-sub">Broker command center — CRM, listings, campaigns, one dashboard.</p>
+    <button class="beat-link case-open" type="button" data-case="wyn" data-hover>OPEN CASE FILE →</button>
   </section>
 
   <section class="beat beat-artifact" data-beat="a2">
@@ -126,6 +127,7 @@
     <div class="beat-rule"></div>
     <p class="beat-sub">Full site + GoHighLevel pipeline that captures, nurtures, closes.</p>
     <a class="beat-link" href="https://miguelcloses.com" target="_blank" rel="noreferrer" data-hover>VISIT ↗</a>
+    <button class="beat-link case-open" type="button" data-case="miguel" data-hover>CASE FILE →</button>
   </section>
 
   <section class="beat beat-artifact" data-beat="a3">
@@ -133,12 +135,14 @@
     <h3 class="beat-name" data-scramble>MICROCOMMIT</h3>
     <div class="beat-rule"></div>
     <p class="beat-sub">iOS habit app with AI coaching, streaks, and community.</p>
+    <button class="beat-link case-open" type="button" data-case="micro" data-hover>OPEN CASE FILE →</button>
   </section>
 
   <section class="beat beat-record" data-beat="record">
     <div class="beat-label">////// (03) The record</div>
     <h2 class="beat-title" data-scramble>THE RECORD</h2>
     <p class="beat-sub">11+ years in enterprise security and identity — now building AI systems that close.</p>
+    <div class="record-body">
     <div class="record-ledger">
       <div class="record-row">
         <span class="r-years">2026 —</span>
@@ -176,6 +180,11 @@
         <span class="r-role">Member Service Representative III</span>
       </div>
     </div>
+    <figure class="record-portrait" aria-hidden="false">
+      <img src="/danilo-headshot.png" alt="Danilo Ojeda">
+      <figcaption>OPERATOR — D. OJEDA<br>44.9°N 93.2°W</figcaption>
+    </figure>
+    </div>
     <div class="record-foot">B.S. COMPUTER &amp; INFORMATION TECHNOLOGY — UNIVERSITY OF MINNESOTA</div>
   </section>
 
@@ -188,8 +197,21 @@
       <a href="https://www.facebook.com/on3n3xus" target="_blank" rel="noreferrer" data-hover data-shape="diamond" data-scramble>FACEBOOK</a>
       <a href="#book" id="book-call" data-hover data-shape="ring" data-scramble>BOOK A CALL</a>
     </nav>
+    <a class="finale-mail" href="mailto:danilo@neurosparkmarketing.com" data-hover>— or email danilo@neurosparkmarketing.com</a>
     <div class="finale-foot">DANILO OJEDA — 44.9°N 93.2°W — AI SYSTEMS FOR CRE</div>
   </section>
+
+  <!-- ══════════ CASE FILE MODAL ══════════ -->
+  <div id="case-modal" aria-hidden="true">
+    <div class="modal-backdrop" data-case-close></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Case file">
+      <button class="modal-close" type="button" data-case-close data-hover>[ X ]</button>
+      <div class="beat-label" id="case-index"></div>
+      <h3 class="modal-title" id="case-title"></h3>
+      <div class="case-body" id="case-body"></div>
+      <a class="case-cta" id="case-cta" href="#" data-hover></a>
+    </div>
+  </div>
 
   <!-- ══════════ BOOK-A-CALL TRANSMISSION FORM ══════════ -->
   <div id="call-modal" aria-hidden="true">

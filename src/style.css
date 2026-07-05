@@ -304,21 +304,65 @@ body {
 .beat-link {
   display: inline-block;
   margin-top: 14px;
+  font-family: var(--mono);
   font-size: 11px; letter-spacing: .3em;
   color: var(--ember-soft);
   text-decoration: none;
+  background: none;
+  border: 0;
   border-bottom: 1px solid rgba(255,139,61,.45);
-  padding-bottom: 3px;
+  padding: 0 0 3px;
+  cursor: none;
   opacity: .9;
 }
+.beat-link + .beat-link { margin-left: 22px; }
 .beat-link:hover { opacity: 1; border-bottom-color: var(--ember-soft); }
 
 .beat-record {
   left: var(--hud-pad); top: 50%;
   transform: translateY(-50%);
-  max-width: min(640px, 72vw);
+  max-width: min(920px, 80vw);
 }
 .beat-record .beat-title { letter-spacing: .38em; }
+
+.record-body {
+  display: grid;
+  grid-template-columns: minmax(0, 640px) 200px;
+  gap: clamp(24px, 3vw, 48px);
+  align-items: start;
+}
+
+.record-portrait {
+  position: relative;
+  margin-top: 30px;
+  padding: 9px;
+  border: 1px solid rgba(246,239,230,.18);
+  background: linear-gradient(165deg, rgba(255,106,47,.10), rgba(5,4,3,.55));
+}
+.record-portrait::before, .record-portrait::after {
+  content: "+";
+  position: absolute;
+  font-size: 12px;
+  color: var(--ember-soft);
+  opacity: .8;
+}
+.record-portrait::before { top: -7px; left: -6px; }
+.record-portrait::after { bottom: -8px; right: -6px; }
+.record-portrait img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 22%;
+  filter: grayscale(.85) contrast(1.06) brightness(.92);
+}
+.record-portrait figcaption {
+  margin-top: 10px;
+  font-size: 9px;
+  line-height: 1.7;
+  letter-spacing: .22em;
+  color: var(--dust);
+}
 
 .record-ledger {
   margin-top: 30px;
@@ -388,22 +432,65 @@ body {
   text-shadow: 0 0 26px rgba(255,139,61,.75);
 }
 
+.finale-mail {
+  display: inline-block;
+  margin-top: 4.5vh;
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--dust);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(154,143,131,.35);
+  padding-bottom: 3px;
+}
+.finale-mail:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
 .finale-foot {
-  margin-top: 9vh;
+  margin-top: 6vh;
   font-size: 10.5px;
   letter-spacing: .18em;
   opacity: .65;
 }
 
-/* ══════════ BOOK-A-CALL TRANSMISSION FORM ══════════ */
+/* ══════════ MODALS (case files + book-a-call) ══════════ */
 
-#call-modal {
+#call-modal, #case-modal {
   position: fixed; inset: 0;
   z-index: 60;
   display: none;
   align-items: center; justify-content: center;
 }
-#call-modal.open { display: flex; }
+#call-modal.open, #case-modal.open { display: flex; }
+
+#case-modal .modal-panel { width: min(560px, 92vw); }
+
+.case-body { margin-top: 6px; }
+.case-section { margin-top: 22px; }
+.case-section h4 {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .26em;
+  color: var(--ember-soft);
+  margin-bottom: 8px;
+}
+.case-section p {
+  font-size: 12.5px;
+  line-height: 1.75;
+  letter-spacing: .02em;
+  color: var(--ink);
+  opacity: .88;
+}
+.case-cta {
+  display: inline-block;
+  margin-top: 26px;
+  font-size: 11px;
+  letter-spacing: .3em;
+  color: var(--ember-soft);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,139,61,.45);
+  padding-bottom: 3px;
+}
+.case-cta:hover { border-bottom-color: var(--ember-soft); }
+.case-cta[hidden] { display: none; }
 
 .modal-backdrop {
   position: absolute; inset: 0;
@@ -675,6 +762,8 @@ body.touch, body.touch * { cursor: auto !important; }
   .beat-hero { max-width: 86vw; }
   .beat-hero .beat-title { letter-spacing: .12em; white-space: normal; }
   .beat-record { max-width: 86vw; }
+  .record-body { grid-template-columns: 1fr; }
+  .record-portrait { display: none; }        /* ledger owns the small screen */
   .record-row {
     grid-template-columns: 62px 1fr;
     grid-template-areas: "years co" "years role";

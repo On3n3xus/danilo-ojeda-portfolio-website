@@ -29,6 +29,16 @@ for (const [name, p] of stops) {
   await page.screenshot({ path: `${OUT}/${name}.png` })
 }
 
+// case file modal
+await page.evaluate(() => window.__flight.setProgress(0.56))
+await page.waitForTimeout(2800)
+await page.evaluate(() => document.querySelector('[data-case="wyn"]').click())
+await page.waitForTimeout(900)
+await page.screenshot({ path: `${OUT}/05c-case-wyn.png` })
+await page.keyboard.press('Escape')
+await page.evaluate(() => window.__flight.setProgress(0.95))
+await page.waitForTimeout(2800)
+
 // book-a-call modal (no real submit — that would email Danilo)
 await page.evaluate(() => document.getElementById('book-call').click())
 await page.waitForTimeout(900)

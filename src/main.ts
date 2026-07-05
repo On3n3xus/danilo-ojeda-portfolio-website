@@ -79,36 +79,65 @@ const Sound = {
     this.master.gain.value = 0;
     this.master.connect(ctx.destination);
 
-    // wind between towers: looped noise through a wandering lowpass
+    /* — the grid score: dark detuned saw pads, a gated bass pulse,
+         and a deep sub. Synthesized Tron-style, no audio files. — */
+
+    // sub: the floor of the grid
+    ([[55, 0.055], [27.5, 0.03]] as const).forEach(([f, g]) => {
+      const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = f;
+      const og = ctx.createGain(); og.gain.value = g;
+      o.connect(og).connect(this.master!);
+      o.start();
+    });
+
+    // pads: A-minor stack, each note a detuned saw pair through a dark lowpass
+    const padLp = ctx.createBiquadFilter();
+    padLp.type = "lowpass"; padLp.frequency.value = 520; padLp.Q.value = 0.7;
+    const padGain = ctx.createGain(); padGain.gain.value = 1;
+    padLp.connect(padGain).connect(this.master);
+    ([[110, 0.02], [130.81, 0.016], [164.81, 0.014], [220, 0.008]] as const).forEach(([f, g]) => {
+      for (const cents of [-4, 4]) {
+        const o = ctx.createOscillator(); o.type = "sawtooth";
+        o.frequency.value = f; o.detune.value = cents;
+        const og = ctx.createGain(); og.gain.value = g;
+        o.connect(og).connect(padLp);
+        o.start();
+      }
+    });
+    // slow breath over the pad filter (the derezzed skyline shimmering)
+    const padLfo = ctx.createOscillator(); padLfo.frequency.value = 0.05;
+    const padLfoAmp = ctx.createGain(); padLfoAmp.gain.value = 220;
+    padLfo.connect(padLfoAmp).connect(padLp.frequency);
+    padLfo.start();
+
+    // pulse: gated saw bass — the lightcycle idle
+    const pulse = ctx.createOscillator(); pulse.type = "sawtooth"; pulse.frequency.value = 55;
+    const pulseLp = ctx.createBiquadFilter();
+    pulseLp.type = "lowpass"; pulseLp.frequency.value = 240; pulseLp.Q.value = 1.2;
+    const pulseGain = ctx.createGain(); pulseGain.gain.value = 0.034;
+    const gate = ctx.createOscillator(); gate.type = "square"; gate.frequency.value = 1.75;
+    const gateDepth = ctx.createGain(); gateDepth.gain.value = 0.034;
+    gate.connect(gateDepth).connect(pulseGain.gain);
+    pulse.connect(pulseLp).connect(pulseGain).connect(this.master);
+    pulse.start(); gate.start();
+
+    // faint air so the mix never goes fully dry
     const len = ctx.sampleRate * 4;
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const data = buf.getChannelData(0);
     let last = 0;
-    for (let i = 0; i < len; i++) {                 // brown-ish noise
+    for (let i = 0; i < len; i++) {
       const white = Math.random() * 2 - 1;
       last = (last + 0.02 * white) / 1.02;
       data[i] = last * 3.2;
     }
     const src = ctx.createBufferSource();
     src.buffer = buf; src.loop = true;
-    const lp = ctx.createBiquadFilter();
-    lp.type = "lowpass"; lp.frequency.value = 380; lp.Q.value = 0.4;
-    const windGain = ctx.createGain(); windGain.gain.value = 0.5;
-    src.connect(lp).connect(windGain).connect(this.master);
+    const airLp = ctx.createBiquadFilter();
+    airLp.type = "lowpass"; airLp.frequency.value = 300; airLp.Q.value = 0.4;
+    const airGain = ctx.createGain(); airGain.gain.value = 0.14;
+    src.connect(airLp).connect(airGain).connect(this.master);
     src.start();
-    const lfo = ctx.createOscillator(); lfo.frequency.value = 0.07;
-    const lfoAmp = ctx.createGain(); lfoAmp.gain.value = 170;
-    lfo.connect(lfoAmp).connect(lp.frequency);
-    lfo.start();
-
-    // drone: deep detuned sines — the grid humming
-    ([[55, 0.05], [55.4, 0.03], [82.41, 0.022]] as const).forEach(([f, g]) => {
-      const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = f;
-      const og = ctx.createGain(); og.gain.value = g;
-      const olp = ctx.createBiquadFilter(); olp.type = "lowpass"; olp.frequency.value = 220;
-      o.connect(og).connect(olp).connect(this.master!);
-      o.start();
-    });
   },
   toggle() {
     this.init();
@@ -461,7 +490,7 @@ function updateSpike(now: number) {
 type Win = { el: HTMLElement; in0: number; in1: number; out0: number; out1: number; seen: boolean; hasLink: boolean };
 const beat = (name: string, in0: number, in1: number, out0: number, out1: number): Win => {
   const el = $(`[data-beat="${name}"]`);
-  return { el, in0, in1, out0, out1, seen: false, hasLink: !!el.querySelector("a") };
+  return { el, in0, in1, out0, out1, seen: false, hasLink: !!el.querySelector("a, button") };
 };
 const beats: Record<string, Win> = {
   hero:   beat("hero",   -1,    -1,    0.06,  0.12),
@@ -691,26 +720,112 @@ $$("[data-rail]").forEach((a) => {
   a.addEventListener("mouseenter", () => Sound.tick());
 });
 
+/* ── case files ──────────────────────────────────────────────── */
+type CaseFile = {
+  index: string; title: string;
+  sections: { label: string; text: string }[];
+  cta?: { label: string; href: string };
+};
+const CASE_FILES: Record<string, CaseFile> = {
+  wyn: {
+    index: "////// Case file — 01 / 03",
+    title: "WYN INTELLIGENCE",
+    sections: [
+      { label: "// The brief", text: "Wyn Group's brokers were running deals out of inboxes and spreadsheets — listings, campaigns, and follow-up scattered across tools with no single view of the pipeline." },
+      { label: "// The build", text: "A broker command center: CRM views tuned to CRE deal flow, listing workflows, campaign approvals, and a performance dashboard. Underneath, an AI layer — voice agents for inbound and outbound leasing calls, buyer-intent lead scraping that lands directly in the CRM, and automated follow-up so no signal goes cold." },
+      { label: "// Status", text: "In production inside Wyn Group. Private case study — full numbers on a call." },
+    ],
+    cta: { label: "BOOK A CALL →", href: "#book" },
+  },
+  miguel: {
+    index: "////// Case file — 02 / 03",
+    title: "MIGUEL CLOSES",
+    sections: [
+      { label: "// The brief", text: "A high-volume realtor needed his brand, lead capture, and follow-up working while he was in the field — not another static brochure site." },
+      { label: "// The build", text: "Full site build plus a GoHighLevel backend: lead capture wired into nurture sequences, pipeline automation shaped around realtor workflows, and booking flows that turn visits into conversations without him touching a thing." },
+      { label: "// Status", text: "Live and closing." },
+    ],
+    cta: { label: "VISIT MIGUELCLOSES.COM ↗", href: "https://miguelcloses.com" },
+  },
+  micro: {
+    index: "////// Case file — 03 / 03",
+    title: "MICROCOMMIT",
+    sections: [
+      { label: "// The brief", text: "Habit apps die when motivation does. MicroCommit bets on tiny commitments, streaks, and social pressure instead of willpower." },
+      { label: "// The build", text: "iOS app with streak tracking, community challenges, and an AI coach that adapts its nudges to how you actually behave — product design, build, and AI integration end to end." },
+      { label: "// Status", text: "Product build — iOS." },
+    ],
+  },
+};
+
+const caseModal = $("#case-modal");
+const caseIndex = $("#case-index"), caseTitle = $("#case-title"),
+      caseBody = $("#case-body"), caseCta = $<HTMLAnchorElement>("#case-cta");
+
+function syncModalOpen() {
+  modalOpen = !!document.querySelector("#call-modal.open, #case-modal.open");
+}
+
+function openCase(key: string) {
+  const file = CASE_FILES[key];
+  if (!file) return;
+  caseIndex.textContent = file.index;
+  caseTitle.textContent = file.title;
+  caseBody.innerHTML = file.sections
+    .map((s) => `<div class="case-section"><h4>${s.label}</h4><p>${s.text}</p></div>`)
+    .join("");
+  if (file.cta) {
+    caseCta.hidden = false;
+    caseCta.textContent = file.cta.label;
+    caseCta.href = file.cta.href;
+    if (file.cta.href.startsWith("http")) { caseCta.target = "_blank"; caseCta.rel = "noreferrer"; }
+    else { caseCta.removeAttribute("target"); caseCta.removeAttribute("rel"); }
+  } else caseCta.hidden = true;
+  caseModal.classList.add("open");
+  caseModal.setAttribute("aria-hidden", "false");
+  syncModalOpen();
+  scrambles.delete(caseTitle);           // title changes per file — rebuild the scramble
+  getScramble(caseTitle).play(500);
+  Sound.tick();
+}
+
+function closeCase() {
+  caseModal.classList.remove("open");
+  caseModal.setAttribute("aria-hidden", "true");
+  syncModalOpen();
+}
+
+$$(".case-open").forEach((btn) =>
+  btn.addEventListener("click", () => openCase(btn.dataset.case || "")));
+$$("#case-modal [data-case-close]").forEach((el) => el.addEventListener("click", closeCase));
+caseCta.addEventListener("click", (e) => {
+  if (caseCta.getAttribute("href") === "#book") {
+    e.preventDefault();
+    closeCase();
+    openModal();                          // hand off to the book-a-call form
+  }
+});
+
 /* ── book-a-call transmission form ───────────────────────────── */
-const FORM_ENDPOINT = "https://formsubmit.co/ajax/on3n3xus@gmail.com";
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/danilo@neurosparkmarketing.com";
 const callModal = $("#call-modal");
 const callForm = $<HTMLFormElement>("#call-form");
 const formStatus = $("#form-status");
 const sendBtn = $<HTMLButtonElement>(".modal-send");
 
 function openModal() {
-  modalOpen = true;
   callModal.classList.add("open");
   callModal.setAttribute("aria-hidden", "false");
+  syncModalOpen();
   getScramble($(".modal-title")).play(500);
   Sound.tick();
   setTimeout(() => $<HTMLInputElement>('#call-form input[name="name"]')?.focus(), 480);
 }
 
 function closeModal() {
-  modalOpen = false;
   callModal.classList.remove("open");
   callModal.setAttribute("aria-hidden", "true");
+  syncModalOpen();
 }
 
 $("#book-call").addEventListener("click", (e) => {
@@ -718,7 +833,7 @@ $("#book-call").addEventListener("click", (e) => {
   openModal();
 });
 $$("#call-modal [data-close]").forEach((el) => el.addEventListener("click", closeModal));
-addEventListener("keydown", (e) => { if (e.key === "Escape" && modalOpen) closeModal(); });
+addEventListener("keydown", (e) => { if (e.key === "Escape" && modalOpen) { closeModal(); closeCase(); } });
 
 callForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -748,7 +863,7 @@ callForm.addEventListener("submit", async (e) => {
     setTimeout(closeModal, 2600);
   } catch {
     formStatus.className = "form-status err";
-    formStatus.textContent = "// signal lost — try again, or email on3n3xus@gmail.com";
+    formStatus.textContent = "// signal lost — try again, or email danilo@neurosparkmarketing.com";
   } finally {
     sendBtn.disabled = false;
   }
