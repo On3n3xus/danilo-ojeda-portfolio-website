@@ -761,7 +761,18 @@ body.touch, body.touch * { cursor: auto !important; }
   .beat-hero .beat-title { letter-spacing: .12em; white-space: normal; }
   .beat-record { max-width: 86vw; }
   .record-body { grid-template-columns: 1fr; }
-  .record-portrait { display: none; }        /* ledger owns the small screen */
+  .record-row { padding: 7px 0; }
+  .record-portrait {
+    width: 96px;
+    margin: 12px auto 0;                     /* compact card under the ledger */
+    justify-self: center;
+  }
+  .record-portrait img {
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 18%;                /* head and shoulders at this size */
+  }
+  .record-portrait figcaption { display: none; }
   .record-row {
     grid-template-columns: 62px 1fr;
     grid-template-areas: "years co" "years role";
