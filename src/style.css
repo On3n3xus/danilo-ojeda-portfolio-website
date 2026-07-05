@@ -321,17 +321,21 @@ body {
 .beat-record {
   left: var(--hud-pad); top: 50%;
   transform: translateY(-50%);
-  max-width: min(680px, 78vw);
+  max-width: min(920px, 80vw);
 }
 .beat-record .beat-title { letter-spacing: .38em; }
 
-/* portrait rides above the act label, between the logo and the title */
+.record-body {
+  display: grid;
+  grid-template-columns: minmax(0, 640px) 220px;
+  gap: clamp(24px, 3vw, 48px);
+  align-items: start;
+}
+
 .record-portrait {
   position: relative;
-  display: inline-block;
-  width: 128px;
-  margin: 0 0 24px;
-  padding: 7px;
+  margin-top: 30px;
+  padding: 9px;
   border: 1px solid rgba(246,239,230,.18);
   background: linear-gradient(165deg, rgba(255,106,47,.10), rgba(5,4,3,.55));
 }
@@ -347,16 +351,16 @@ body {
 .record-portrait img {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 9 / 16;
   object-fit: cover;
-  object-position: 50% 16%;
+  object-position: 50% 14%;
   filter: grayscale(.85) contrast(1.06) brightness(.92);
 }
 .record-portrait figcaption {
-  margin-top: 8px;
-  font-size: 8.5px;
-  line-height: 1.6;
-  letter-spacing: .14em;
+  margin-top: 10px;
+  font-size: 9px;
+  line-height: 1.7;
+  letter-spacing: .22em;
   color: var(--dust);
 }
 
@@ -758,8 +762,8 @@ body.touch, body.touch * { cursor: auto !important; }
   .beat-hero { max-width: 86vw; }
   .beat-hero .beat-title { letter-spacing: .12em; white-space: normal; }
   .beat-record { max-width: 86vw; }
-  .record-portrait { width: 96px; margin-bottom: 16px; }
-  .record-portrait figcaption { display: none; }   /* caption crowds small screens */
+  .record-body { grid-template-columns: 1fr; }
+  .record-portrait { display: none; }        /* ledger owns the small screen */
   .record-row {
     grid-template-columns: 62px 1fr;
     grid-template-areas: "years co" "years role";
