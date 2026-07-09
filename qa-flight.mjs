@@ -1,69 +1,79 @@
+import { mkdir } from 'node:fs/promises'
 import { chromium } from 'playwright'
 
-const BASE = process.env.QA_URL || 'http://localhost:5173'
-const OUT = '.firecrawl/qa'
+const BASE = process.env.QA_URL || 'http://127.0.0.1:5173'
+const OUT = '.firecrawl/qa-atlas'
+await mkdir(OUT, { recursive: true })
+
 const browser = await chromium.launch()
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-page.on('console', (m) => { if (m.type() === 'error') console.log('CONSOLE ERROR:', m.text()) })
-page.on('pageerror', (e) => console.log('PAGE ERROR:', e.message))
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+const browserErrors = []
 
-await page.goto(BASE)
-await page.waitForSelector('#loader.ready', { timeout: 20000 })
-await page.screenshot({ path: `${OUT}/00-loader-ready.png` })
+page.on('console', (message) => {
+  if (message.type() === 'error') browserErrors.push(`console: ${message.text()}`)
+})
+page.on('pageerror', (error) => browserErrors.push(`page: ${error.message}`))
 
-await page.click('#loader-enter')
-await page.waitForTimeout(2600)
-await page.screenshot({ path: `${OUT}/01-hero.png` })
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.locator('.hero').waitFor({ state: 'visible' })
+await page.screenshot({ path: `${OUT}/01-hero-desktop.png` })
 
-const stops = [
-  ['02-street-within', 0.38],
-  ['03-work-a1', 0.56],
-  ['04-work-a2', 0.625],
-  ['05-work-a3', 0.685],
-  ['05b-record', 0.795],
-  ['06-finale', 0.95],
-]
-for (const [name, p] of stops) {
-  await page.evaluate((v) => window.__flight.setProgress(v), p)
-  await page.waitForTimeout(2800)
-  await page.screenshot({ path: `${OUT}/${name}.png` })
-}
+await page.locator('#atlas').scrollIntoViewIfNeeded()
+await page.locator('[data-stage="3"]').click()
+await page.getByText('The CRM becomes the source of truth.').waitFor({ state: 'visible' })
+await page.screenshot({ path: `${OUT}/02-atlas-desktop.png` })
 
-// case file modal
-await page.evaluate(() => window.__flight.setProgress(0.56))
-await page.waitForTimeout(2800)
-await page.evaluate(() => document.querySelector('[data-case="wyn"]').click())
-await page.waitForTimeout(900)
-await page.screenshot({ path: `${OUT}/05c-case-wyn.png` })
-await page.keyboard.press('Escape')
-await page.evaluate(() => window.__flight.setProgress(0.95))
-await page.waitForTimeout(2800)
+await page.locator('#wyn').scrollIntoViewIfNeeded()
+await page.screenshot({ path: `${OUT}/03-wyn-desktop.png` })
 
-// book-a-call modal (no real submit — that would email Danilo)
-await page.evaluate(() => document.getElementById('book-call').click())
-await page.waitForTimeout(900)
-await page.fill('#call-form input[name="name"]', 'Jane Broker')
-await page.fill('#call-form input[name="email"]', 'jane@example.com')
-await page.fill('#call-form input[name="company"]', 'Acme CRE')
-await page.fill('#call-form textarea[name="message"]', 'Voice agent for our leasing line.')
-await page.screenshot({ path: `${OUT}/06b-call-modal.png` })
-await page.keyboard.press('Escape')
-await page.waitForTimeout(400)
+await page.locator('#record').scrollIntoViewIfNeeded()
+await page.screenshot({ path: `${OUT}/04-record-desktop.png` })
 
-// mobile pass
+await page.locator('#diagnostic').scrollIntoViewIfNeeded()
+await page.getByLabel('Several disconnected places').check()
+await page.getByLabel('It depends or is unknown').check()
+await page.getByLabel('Across several systems').check()
+await page.getByRole('button', { name: 'Build my starting map' }).click()
+await page.getByText('Start with one operational record.').waitFor({ state: 'visible' })
+await page.screenshot({ path: `${OUT}/05-diagnostic-desktop.png` })
+
+await page.getByRole('button', { name: 'Book a system review' }).click()
+await page.locator('#contact-dialog').waitFor({ state: 'visible' })
+await page.screenshot({ path: `${OUT}/06-contact-desktop.png` })
+await page.getByRole('button', { name: 'Close contact form' }).click()
+
 await page.setViewportSize({ width: 390, height: 844 })
-await page.evaluate(() => window.__flight.setProgress(0))
-await page.waitForTimeout(2500)
-await page.screenshot({ path: `${OUT}/07-mobile-hero.png` })
-await page.evaluate(() => window.__flight.setProgress(0.625))
-await page.waitForTimeout(2800)
-await page.screenshot({ path: `${OUT}/08-mobile-a2.png` })
-await page.evaluate(() => window.__flight.setProgress(0.795))
-await page.waitForTimeout(2800)
-await page.screenshot({ path: `${OUT}/08b-mobile-record.png` })
-await page.evaluate(() => window.__flight.setProgress(0.95))
-await page.waitForTimeout(2800)
-await page.screenshot({ path: `${OUT}/09-mobile-finale.png` })
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.screenshot({ path: `${OUT}/07-hero-mobile.png` })
+
+await page.getByRole('button', { name: 'Menu' }).click()
+await page.getByRole('navigation', { name: 'Primary navigation' }).waitFor({ state: 'visible' })
+await page.screenshot({ path: `${OUT}/08-menu-mobile.png` })
+for (let index = 0; index < 5; index += 1) await page.keyboard.press('Tab')
+const focusAfterMenuLoop = await page.evaluate(() => document.activeElement?.className)
+if (focusAfterMenuLoop !== 'brand') throw new Error(`Mobile menu focus escaped to ${focusAfterMenuLoop}`)
+await page.getByRole('link', { name: 'The system' }).click()
+await page.waitForTimeout(100)
+const focusAfterMenuNavigation = await page.evaluate(() => document.activeElement?.id)
+if (focusAfterMenuNavigation !== 'atlas') throw new Error(`Navigation focus did not move to #atlas: ${focusAfterMenuNavigation}`)
+
+await page.locator('[data-stage="5"]').click()
+await page.getByText('A conversation reaches the calendar.').waitFor({ state: 'visible' })
+await page.screenshot({ path: `${OUT}/09-atlas-mobile.png` })
+
+await page.locator('#wyn').scrollIntoViewIfNeeded()
+await page.screenshot({ path: `${OUT}/10-wyn-mobile.png` })
+
+await page.locator('#record').scrollIntoViewIfNeeded()
+await page.screenshot({ path: `${OUT}/11-record-mobile.png` })
+
+await page.locator('#diagnostic').scrollIntoViewIfNeeded()
+await page.screenshot({ path: `${OUT}/12-diagnostic-mobile.png` })
 
 await browser.close()
-console.log('QA done')
+
+if (browserErrors.length) {
+  throw new Error(`Browser errors:\n${browserErrors.join('\n')}`)
+}
+
+console.log(`QA complete. Screenshots saved in ${OUT}`)

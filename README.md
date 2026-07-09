@@ -1,32 +1,33 @@
-# daniloojeda.com — Danilo Ojeda, AI Builder
+# daniloojeda.com
 
-A cinematic, virtual-scroll portfolio. There is no scrollbar — wheel / touch / keys
-scrub a 0→1 progress value that flies a Three.js camera through a night city in
-four acts:
+Danilo Ojeda's interactive portfolio for AI systems in commercial real estate.
 
-1. **Skyline** — hero: "Proof of Work." + live telemetry callouts
-2. **Street** — what I do: voice agents, lead engines, CRM automation
-3. **The Work** — Wyn Intelligence · Miguel Closes · MicroCommit
-4. **Signal** — contact: LinkedIn / Instagram / book a call, with a particle
-   swarm that morphs on link hover
+The experience follows one property inquiry through a six-stage pipeline:
 
-Extras: preloader gate ("CLICK TO ENTER"), scramble/glitch text, chromatic-aberration
-act transitions, generated ambient audio (wind + drone, no audio files), film grain,
-ember particles, custom cursor. Honors `prefers-reduced-motion`.
+1. Inquiry capture
+2. Voice conversation
+3. Intent structuring
+4. CRM handoff
+5. Automated follow-up
+6. Booked meeting
+
+The fixed Three.js layer is decorative. Native document scrolling, project evidence, keyboard navigation, reduced-motion support, and the full content experience remain available without it.
 
 ## Stack
 
-Vite + TypeScript + Three.js. No framework, no animation libraries — the whole
-engine lives in [src/main.ts](src/main.ts), styles in [src/style.css](src/style.css),
-markup in [index.html](index.html).
+- Vite
+- TypeScript
+- Three.js
+- Native HTML forms and dialog
+- No UI or animation framework
 
 ## Commands
 
 ```bash
-npm run dev       # dev server
-npm run build     # type-check + production build → dist/
-npm run lint      # oxlint
-node qa-flight.mjs  # headless Playwright QA: screenshots every act (desktop + mobile)
+npm run dev
+npm run build
+npm run lint
+node qa-flight.mjs
 ```
 
-`window.__flight.setProgress(p)` scrubs the flight from the console / tests.
+The QA script captures desktop and mobile checkpoints and verifies the interactive pipeline, diagnostic, navigation, and contact dialog without submitting the live form.
