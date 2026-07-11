@@ -1091,9 +1091,9 @@ main,
 }
 
 .operator-card img {
-  height: min(56vh, 600px);
+  height: min(80vh, 860px);
   object-fit: cover;
-  object-position: 50% 18%;
+  object-position: 50% 16%;
   filter: grayscale(0.9) contrast(1.04);
 }
 
@@ -1838,8 +1838,8 @@ main,
   }
 
   .operator-card img {
-    height: 390px;
-    object-position: 50% 12%;
+    height: 600px;
+    object-position: 50% 15%;
   }
 
   .record-phases article {
