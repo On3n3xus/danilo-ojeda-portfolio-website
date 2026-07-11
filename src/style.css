@@ -1093,7 +1093,7 @@ main,
 .operator-card img {
   height: min(80vh, 860px);
   object-fit: cover;
-  object-position: 50% 16%;
+  object-position: 50% 8%;
   filter: grayscale(0.9) contrast(1.04);
 }
 
@@ -1839,7 +1839,7 @@ main,
 
   .operator-card img {
     height: 600px;
-    object-position: 50% 15%;
+    object-position: 50% 8%;
   }
 
   .record-phases article {
