@@ -8,3 +8,4 @@ verification-*.png
 .firecrawl/
 tmp-video-frames/
 .vercel
+.gstack/
