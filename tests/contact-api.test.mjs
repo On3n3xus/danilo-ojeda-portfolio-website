@@ -23,6 +23,26 @@ const contactRequest = (body, headers = {}) => new Request('https://daniloojeda.
   body: JSON.stringify(body),
 })
 
+const configureDelivery = (context, providerFetch) => {
+  const originalFetch = globalThis.fetch
+  const originalKey = process.env.RESEND_API_KEY
+  const originalFrom = process.env.CONTACT_FROM_EMAIL
+  const originalTo = process.env.CONTACT_TO_EMAIL
+  process.env.RESEND_API_KEY = 're_test_key'
+  process.env.CONTACT_FROM_EMAIL = 'Danilo Ojeda <website@daniloojeda.com>'
+  process.env.CONTACT_TO_EMAIL = 'danilo@example.com'
+  globalThis.fetch = providerFetch
+  context.after(() => {
+    globalThis.fetch = originalFetch
+    if (originalKey === undefined) delete process.env.RESEND_API_KEY
+    else process.env.RESEND_API_KEY = originalKey
+    if (originalFrom === undefined) delete process.env.CONTACT_FROM_EMAIL
+    else process.env.CONTACT_FROM_EMAIL = originalFrom
+    if (originalTo === undefined) delete process.env.CONTACT_TO_EMAIL
+    else process.env.CONTACT_TO_EMAIL = originalTo
+  })
+}
+
 test('validates and normalizes a complete contact request', () => {
   const result = validateContactPayload(validPayload({ email: ' Taylor@Example.com ' }))
   assert.equal(result.ok, true)
@@ -106,4 +126,72 @@ test('sends validated requests to Resend with an idempotency key and bounded tim
   const providerBody = JSON.parse(providerRequest.init.body)
   assert.equal(providerBody.reply_to, payload.email)
   assert.deepEqual(providerBody.to, ['danilo@example.com'])
+})
+
+
+test('returns a generic 502 when the provider request aborts', async (context) => {
+  configureDelivery(context, async () => {
+    throw new DOMException('Timed out', 'AbortError')
+  })
+  const response = await contact.fetch(contactRequest(validPayload()))
+  assert.equal(response.status, 502)
+  assert.deepEqual(await response.json(), { error: 'Contact email is temporarily unavailable.' })
+})
+
+test('returns a generic 502 when the provider rejects the request', async (context) => {
+  configureDelivery(context, async () => new Response('provider detail', { status: 429 }))
+  const response = await contact.fetch(contactRequest(validPayload()))
+  assert.equal(response.status, 502)
+  assert.deepEqual(await response.json(), { error: 'Contact email is temporarily unavailable.' })
+})
+
+test('limits repeated submissions and returns Retry-After', async (context) => {
+  let providerCalls = 0
+  configureDelivery(context, async () => {
+    providerCalls += 1
+    return new Response(JSON.stringify({ id: `email_${providerCalls}` }), { status: 200 })
+  })
+  const headers = { 'X-Forwarded-For': '198.51.100.240' }
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    const response = await contact.fetch(contactRequest(validPayload(), headers))
+    assert.equal(response.status, 200)
+  }
+  const limited = await contact.fetch(contactRequest(validPayload(), headers))
+  assert.equal(limited.status, 429)
+  assert.match(limited.headers.get('Retry-After') || '', /^\d+$/)
+  assert.ok(Number(limited.headers.get('Retry-After')) > 0)
+  assert.equal(providerCalls, 5)
+})
+
+test('cancels an oversized streamed body without buffering the remainder', async () => {
+  let cancelled = false
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new Uint8Array(12 * 1024 + 1))
+    },
+    pull() {
+      return new Promise(() => {})
+    },
+    cancel() {
+      cancelled = true
+    },
+  })
+  const request = new Request('https://daniloojeda.com/api/contact', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'https://daniloojeda.com',
+      'X-Forwarded-For': '198.51.100.241',
+    },
+    body: stream,
+    duplex: 'half',
+  })
+  const result = await Promise.race([
+    contact.fetch(request),
+    new Promise((resolve) => setTimeout(() => resolve('timed-out'), 100)),
+  ])
+  assert.notEqual(result, 'timed-out')
+  assert.ok(result instanceof Response)
+  assert.equal(result.status, 413)
+  assert.equal(cancelled, true)
 })

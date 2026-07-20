@@ -49,7 +49,7 @@ CONTACT_FROM_EMAIL="Danilo Ojeda <website@daniloojeda.com>"
 CONTACT_TO_EMAIL=danilo@neurosparkmarketing.com
 ```
 
-`CONTACT_FROM_EMAIL` must use a domain verified in Resend. For production abuse protection, add a Vercel Firewall rate-limit rule for `POST /api/contact`; the in-function limiter is intentionally only a secondary guard because serverless instances do not share memory.
+`CONTACT_FROM_EMAIL` must use a domain verified in Resend. Production requires the active Vercel Firewall rule `Rate limit portfolio contact form`: exact path `/api/contact`, method `POST`, five requests per 600-second fixed window, keyed by IP, with HTTP 429 on excess traffic. The in-function limiter is intentionally only a secondary guard because serverless instances do not share memory.
 
 ## Analytics and search
 

@@ -133,13 +133,25 @@ export default {
     if (declaredSize > MAX_BODY_BYTES) return json({ error: "The request is too large." }, 413);
 
     let rawBody = "";
-    try {
-      rawBody = await request.text();
-    } catch {
-      return json({ error: "The request body could not be read." }, 400);
-    }
-    if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
-      return json({ error: "The request is too large." }, 413);
+    const reader = request.body?.getReader();
+    if (reader) {
+      const decoder = new TextDecoder();
+      let receivedBytes = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          receivedBytes += value.byteLength;
+          if (receivedBytes > MAX_BODY_BYTES) {
+            await reader.cancel().catch(() => undefined);
+            return json({ error: "The request is too large." }, 413);
+          }
+          rawBody += decoder.decode(value, { stream: true });
+        }
+        rawBody += decoder.decode();
+      } catch {
+        return json({ error: "The request body could not be read." }, 400);
+      }
     }
 
     let input: unknown;
@@ -150,7 +162,7 @@ export default {
     }
 
     const validation = validateContactPayload(input);
-    if (!validation.ok) {
+    if ("error" in validation) {
       if (validation.bot) return json({ ok: true });
       return json({ error: validation.error }, 400);
     }
