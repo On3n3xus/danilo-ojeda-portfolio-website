@@ -195,3 +195,35 @@ test('cancels an oversized streamed body without buffering the remainder', async
   assert.equal(result.status, 413)
   assert.equal(cancelled, true)
 })
+
+
+test('caps the in-memory limiter under distributed traffic', async (context) => {
+  const originalLog = console.log
+  const originalError = console.error
+  console.log = () => {}
+  console.error = () => {}
+  configureDelivery(context, async () => new Response(JSON.stringify({ id: 'email_ok' }), { status: 200 }))
+  context.after(() => {
+    console.log = originalLog
+    console.error = originalError
+  })
+
+  const firstSource = 'distributed-source-0'
+  for (let index = 0; index <= 500; index += 1) {
+    const response = await contact.fetch(contactRequest(validPayload(), {
+      'X-Forwarded-For': `distributed-source-${index}`,
+    }))
+    assert.equal(response.status, 200)
+  }
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const response = await contact.fetch(contactRequest(validPayload(), {
+      'X-Forwarded-For': firstSource,
+    }))
+    assert.equal(response.status, 200)
+  }
+  const limited = await contact.fetch(contactRequest(validPayload(), {
+    'X-Forwarded-For': firstSource,
+  }))
+  assert.equal(limited.status, 429)
+})

@@ -19,6 +19,7 @@ type RateLimitEntry = {
 const MAX_BODY_BYTES = 12_000;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_MAX_ENTRIES = 500;
 const RESEND_TIMEOUT_MS = 8_000;
 const rateLimits = new Map<string, RateLimitEntry>();
 
@@ -76,24 +77,30 @@ export function validateContactPayload(input: unknown): ValidationResult {
 }
 
 function rateLimit(request: Request, now = Date.now()) {
-  if (rateLimits.size > 500) {
-    for (const [entryKey, entry] of rateLimits) {
-      if (entry.resetAt <= now) rateLimits.delete(entryKey);
-    }
-  }
-
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const key = forwarded || request.headers.get("x-real-ip") || "unknown";
   const current = rateLimits.get(key);
 
-  if (!current || current.resetAt <= now) {
-    rateLimits.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true, retryAfter: 0 };
+  if (current && current.resetAt > now) {
+    current.count += 1;
+    if (current.count <= RATE_LIMIT_MAX) return { allowed: true, retryAfter: 0 };
+    return { allowed: false, retryAfter: Math.max(1, Math.ceil((current.resetAt - now) / 1000)) };
+  }
+  if (current) rateLimits.delete(key);
+
+  if (rateLimits.size >= RATE_LIMIT_MAX_ENTRIES) {
+    for (const [entryKey, entry] of rateLimits) {
+      if (entry.resetAt <= now) rateLimits.delete(entryKey);
+    }
+  }
+  while (rateLimits.size >= RATE_LIMIT_MAX_ENTRIES) {
+    const oldestKey = rateLimits.keys().next().value;
+    if (oldestKey === undefined) break;
+    rateLimits.delete(oldestKey);
   }
 
-  current.count += 1;
-  if (current.count <= RATE_LIMIT_MAX) return { allowed: true, retryAfter: 0 };
-  return { allowed: false, retryAfter: Math.max(1, Math.ceil((current.resetAt - now) / 1000)) };
+  rateLimits.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+  return { allowed: true, retryAfter: 0 };
 }
 
 function log(level: "info" | "error", message: string, request: Request, started: number, extra: Record<string, unknown> = {}) {
