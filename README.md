@@ -28,12 +28,15 @@ The fixed Three.js layer is decorative. Native document scrolling, project evide
 
 ```bash
 npm run dev
+npm run dev:vite
 npm run build
 npm run lint
 npm run test:contact
 npm run qa
 npm run check:links
 ```
+
+`npm run dev` launches the full Vercel development runtime, including `/api/contact`, through the pinned Vercel CLI version. `npm run dev:vite` is frontend-only and does not serve the contact API.
 
 The QA script captures desktop, tablet, mobile, and reduced-motion checkpoints. It verifies the interactive pipeline, diagnostic, navigation, contact success and failure states, and layout overflow without sending a live email.
 
