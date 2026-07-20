@@ -1,4 +1,36 @@
-import * as THREE from "three";
+import {
+  ACESFilmicToneMapping,
+  BoxGeometry,
+  BufferAttribute,
+  BufferGeometry,
+  Color,
+  CylinderGeometry,
+  DirectionalLight,
+  Fog,
+  HemisphereLight,
+  IcosahedronGeometry,
+  InstancedMesh,
+  Line,
+  LineBasicMaterial,
+  LineDashedMaterial,
+  LineSegments,
+  Material,
+  Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  Object3D,
+  OctahedronGeometry,
+  PerspectiveCamera,
+  PlaneGeometry,
+  Points,
+  PointsMaterial,
+  Scene,
+  SRGBColorSpace,
+  StaticDrawUsage,
+  TorusGeometry,
+  Vector3,
+  WebGLRenderer,
+} from "three";
 
 export type AtlasProject = "wyn" | "miguel" | "micro";
 
@@ -33,12 +65,12 @@ interface ProjectTower {
   key: AtlasProject;
   x: number;
   z: number;
-  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  cap: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
-  material: THREE.MeshStandardMaterial;
-  capMaterial: THREE.MeshBasicMaterial;
-  night: THREE.Color;
-  survey: THREE.Color;
+  mesh: Mesh<BufferGeometry, MeshStandardMaterial>;
+  cap: Mesh<BufferGeometry, MeshBasicMaterial>;
+  material: MeshStandardMaterial;
+  capMaterial: MeshBasicMaterial;
+  night: Color;
+  survey: Color;
   focus: number;
   spin: number;
 }
@@ -53,17 +85,17 @@ export function createAtlasScene(
   const allowPointer = window.matchMedia("(pointer: fine)").matches && !reducedMotion;
   const maxPixelRatio = Math.max(1, options.maxPixelRatio ?? 1.75);
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 160);
+  const scene = new Scene();
+  const camera = new PerspectiveCamera(34, 1, 0.1, 160);
   camera.position.set(-25, 22, 28);
 
-  const renderer = new THREE.WebGLRenderer({
+  const renderer = new WebGLRenderer({
     antialias: true,
     alpha: false,
-    powerPreference: "high-performance",
+    powerPreference: "default",
   });
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.outputColorSpace = SRGBColorSpace;
+  renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.92;
   renderer.domElement.setAttribute("aria-hidden", "true");
   renderer.domElement.setAttribute("role", "presentation");
@@ -81,43 +113,43 @@ export function createAtlasScene(
 
   const palette = {
     night: {
-      clear: new THREE.Color("#050403"),
-      ground: new THREE.Color("#090908"),
-      mass: new THREE.Color("#171a19"),
-      marker: new THREE.Color("#76a991"),
-      grid: new THREE.Color("#3657d6"),
-      route: new THREE.Color("#b8643e"),
-      light: new THREE.Color("#d7d9d1"),
+      clear: new Color("#050403"),
+      ground: new Color("#090908"),
+      mass: new Color("#171a19"),
+      marker: new Color("#76a991"),
+      grid: new Color("#3657d6"),
+      route: new Color("#b8643e"),
+      light: new Color("#d7d9d1"),
     },
     survey: {
-      clear: new THREE.Color("#e7e5dc"),
-      ground: new THREE.Color("#d5d2c7"),
-      mass: new THREE.Color("#a8aaa2"),
-      marker: new THREE.Color("#3657d6"),
-      grid: new THREE.Color("#3657d6"),
-      route: new THREE.Color("#a94f32"),
-      light: new THREE.Color("#fffdf4"),
+      clear: new Color("#e7e5dc"),
+      ground: new Color("#d5d2c7"),
+      mass: new Color("#a8aaa2"),
+      marker: new Color("#3657d6"),
+      grid: new Color("#3657d6"),
+      route: new Color("#a94f32"),
+      light: new Color("#fffdf4"),
     },
   };
-  const colorScratch = new THREE.Color();
-  const lookTarget = new THREE.Vector3();
-  const resources: Array<THREE.BufferGeometry | THREE.Material> = [];
+  const colorScratch = new Color();
+  const lookTarget = new Vector3();
+  const resources: Array<BufferGeometry | Material> = [];
 
-  const fog = new THREE.Fog(palette.night.clear, 18, 76);
+  const fog = new Fog(palette.night.clear, 18, 76);
   scene.fog = fog;
 
-  const hemisphere = new THREE.HemisphereLight(palette.night.light, palette.night.clear, 2.1);
-  const keyLight = new THREE.DirectionalLight(palette.night.light, 2.7);
+  const hemisphere = new HemisphereLight(palette.night.light, palette.night.clear, 2.1);
+  const keyLight = new DirectionalLight(palette.night.light, 2.7);
   keyLight.position.set(-16, 28, 12);
   scene.add(hemisphere, keyLight);
 
-  const groundGeometry = new THREE.PlaneGeometry(110, 110);
-  const groundMaterial = new THREE.MeshStandardMaterial({
+  const groundGeometry = new PlaneGeometry(110, 110);
+  const groundMaterial = new MeshStandardMaterial({
     color: palette.night.ground,
     roughness: 0.96,
     metalness: 0.02,
   });
-  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  const ground = new Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.08;
   scene.add(ground);
@@ -140,15 +172,15 @@ export function createAtlasScene(
     gridPositions[gridCursor++] = 0;
     gridPositions[gridCursor++] = 45;
   }
-  const gridGeometry = new THREE.BufferGeometry();
-  gridGeometry.setAttribute("position", new THREE.BufferAttribute(gridPositions, 3));
-  const gridMaterial = new THREE.LineBasicMaterial({
+  const gridGeometry = new BufferGeometry();
+  gridGeometry.setAttribute("position", new BufferAttribute(gridPositions, 3));
+  const gridMaterial = new LineBasicMaterial({
     color: palette.night.grid,
     transparent: true,
     opacity: 0.13,
     depthWrite: false,
   });
-  const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
+  const grid = new LineSegments(gridGeometry, gridMaterial);
   grid.position.y = 0.01;
   scene.add(grid);
   resources.push(gridGeometry, gridMaterial);
@@ -156,15 +188,15 @@ export function createAtlasScene(
   const buildingCount = 100;
   const windowsPerBuilding = 4;
   const markerPositions = new Float32Array(buildingCount * windowsPerBuilding * 3);
-  const buildingGeometry = new THREE.BoxGeometry(1, 1, 1);
-  const buildingMaterial = new THREE.MeshStandardMaterial({
+  const buildingGeometry = new BoxGeometry(1, 1, 1);
+  const buildingMaterial = new MeshStandardMaterial({
     color: palette.night.mass,
     roughness: 0.78,
     metalness: 0.16,
   });
-  const buildings = new THREE.InstancedMesh(buildingGeometry, buildingMaterial, buildingCount);
-  buildings.instanceMatrix.setUsage(THREE.StaticDrawUsage);
-  const matrixObject = new THREE.Object3D();
+  const buildings = new InstancedMesh(buildingGeometry, buildingMaterial, buildingCount);
+  buildings.instanceMatrix.setUsage(StaticDrawUsage);
+  const matrixObject = new Object3D();
   const reserved = new Set([28, 32, 65]);
   let markerCursor = 0;
   const noise = (seed: number) => {
@@ -204,9 +236,9 @@ export function createAtlasScene(
   scene.add(buildings);
   resources.push(buildingGeometry, buildingMaterial);
 
-  const markerGeometry = new THREE.BufferGeometry();
-  markerGeometry.setAttribute("position", new THREE.BufferAttribute(markerPositions, 3));
-  const markerMaterial = new THREE.PointsMaterial({
+  const markerGeometry = new BufferGeometry();
+  markerGeometry.setAttribute("position", new BufferAttribute(markerPositions, 3));
+  const markerMaterial = new PointsMaterial({
     color: palette.night.marker,
     size: 0.13,
     sizeAttenuation: true,
@@ -214,7 +246,7 @@ export function createAtlasScene(
     opacity: 0.72,
     depthWrite: false,
   });
-  const markers = new THREE.Points(markerGeometry, markerMaterial);
+  const markers = new Points(markerGeometry, markerMaterial);
   scene.add(markers);
   resources.push(markerGeometry, markerMaterial);
 
@@ -224,22 +256,22 @@ export function createAtlasScene(
     x: number,
     z: number,
     height: number,
-    geometry: THREE.BufferGeometry,
-    capGeometry: THREE.BufferGeometry,
+    geometry: BufferGeometry,
+    capGeometry: BufferGeometry,
     night: string,
     survey: string,
     spin: number,
   ) => {
-    const material = new THREE.MeshStandardMaterial({
+    const material = new MeshStandardMaterial({
       color: night,
       emissive: night,
       emissiveIntensity: 0.32,
       roughness: 0.46,
       metalness: 0.34,
     });
-    const capMaterial = new THREE.MeshBasicMaterial({ color: night });
-    const mesh = new THREE.Mesh(geometry, material);
-    const cap = new THREE.Mesh(capGeometry, capMaterial);
+    const capMaterial = new MeshBasicMaterial({ color: night });
+    const mesh = new Mesh(geometry, material);
+    const cap = new Mesh(capGeometry, capMaterial);
     mesh.position.set(x, height * 0.5 + 0.24, z);
     cap.position.set(x, height + 0.48, z);
     scene.add(mesh, cap);
@@ -252,39 +284,39 @@ export function createAtlasScene(
       cap,
       material,
       capMaterial,
-      night: new THREE.Color(night),
-      survey: new THREE.Color(survey),
+      night: new Color(night),
+      survey: new Color(survey),
       focus: 0,
       spin,
     });
   };
 
-  const wynBody = new THREE.CylinderGeometry(1.45, 1.78, 11.5, 6);
-  const wynCap = new THREE.IcosahedronGeometry(0.52, 0);
+  const wynBody = new CylinderGeometry(1.45, 1.78, 11.5, 6);
+  const wynCap = new IcosahedronGeometry(0.52, 0);
   addTower("wyn", -8, -4.8, 11.5, wynBody, wynCap, "#76a991", "#3657d6", 0.32);
 
-  const miguelBody = new THREE.BoxGeometry(2.35, 8.8, 2.35);
-  const miguelCap = new THREE.TorusGeometry(0.76, 0.1, 6, 24);
+  const miguelBody = new BoxGeometry(2.35, 8.8, 2.35);
+  const miguelCap = new TorusGeometry(0.76, 0.1, 6, 24);
   miguelBody.rotateY(Math.PI * 0.25);
   miguelCap.rotateX(Math.PI * 0.5);
   addTower("miguel", 1.6, 4.8, 8.8, miguelBody, miguelCap, "#b8643e", "#a94f32", -0.42);
 
-  const microBody = new THREE.CylinderGeometry(0.92, 1.48, 7.3, 4);
-  const microCap = new THREE.OctahedronGeometry(0.56, 0);
+  const microBody = new CylinderGeometry(0.92, 1.48, 7.3, 4);
+  const microCap = new OctahedronGeometry(0.56, 0);
   microBody.rotateY(Math.PI * 0.25);
   addTower("micro", 11.2, -8, 7.3, microBody, microCap, "#7799a6", "#76a991", 0.56);
 
-  const routeGeometry = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-18, 0.18, 9.5),
-    new THREE.Vector3(-12.5, 0.18, 3.4),
-    new THREE.Vector3(-8, 0.18, -4.8),
-    new THREE.Vector3(-2.1, 0.18, -0.8),
-    new THREE.Vector3(1.6, 0.18, 4.8),
-    new THREE.Vector3(7.4, 0.18, 0.2),
-    new THREE.Vector3(11.2, 0.18, -8),
-    new THREE.Vector3(18, 0.18, -12),
+  const routeGeometry = new BufferGeometry().setFromPoints([
+    new Vector3(-18, 0.18, 9.5),
+    new Vector3(-12.5, 0.18, 3.4),
+    new Vector3(-8, 0.18, -4.8),
+    new Vector3(-2.1, 0.18, -0.8),
+    new Vector3(1.6, 0.18, 4.8),
+    new Vector3(7.4, 0.18, 0.2),
+    new Vector3(11.2, 0.18, -8),
+    new Vector3(18, 0.18, -12),
   ]);
-  const routeMaterial = new THREE.LineDashedMaterial({
+  const routeMaterial = new LineDashedMaterial({
     color: palette.night.route,
     dashSize: 0.9,
     gapSize: 0.55,
@@ -292,7 +324,7 @@ export function createAtlasScene(
     opacity: 0.9,
     depthWrite: false,
   });
-  const route = new THREE.Line(routeGeometry, routeMaterial);
+  const route = new Line(routeGeometry, routeMaterial);
   route.computeLineDistances();
   route.renderOrder = 3;
   scene.add(route);

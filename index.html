@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Danilo Ojeda | AI Systems for Commercial Real Estate</title>
   <meta name="description" content="Danilo Ojeda builds voice agents, lead systems, CRM automation, and follow-up infrastructure for commercial real estate teams.">
+  <meta name="author" content="Danilo Ojeda">
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://daniloojeda.com/">
   <meta name="theme-color" content="#121514">
   <meta property="og:title" content="Danilo Ojeda | AI Systems for CRE">
   <meta property="og:description" content="From first inquiry to booked conversation. See the systems behind the pipeline.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://daniloojeda.com/">
+  <meta property="og:site_name" content="Danilo Ojeda">
   <meta property="og:image" content="https://daniloojeda.com/og-danilo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -63,7 +66,7 @@
       <a href="#atlas">The system</a>
       <a href="#work">Proof</a>
       <a href="#record">Record</a>
-      <a class="nav-cta" href="#diagnostic">Map my pipeline</a>
+      <a class="nav-cta" href="#diagnostic" data-track="nav_diagnostic">Map my pipeline</a>
     </nav>
   </header>
 
@@ -77,8 +80,8 @@
         <p class="hero-lede">Voice agents, lead intelligence, CRM automation, and follow-up infrastructure, built by an operator with more than a decade in security and identity.</p>
 
         <div class="hero-actions">
-          <a class="button button-primary" href="#atlas">Run the pipeline <span aria-hidden="true">↓</span></a>
-          <a class="text-link" href="#work">See the proof <span aria-hidden="true">↗</span></a>
+          <a class="button button-primary" href="#atlas" data-track="hero_pipeline">Run the pipeline <span aria-hidden="true">↓</span></a>
+          <a class="text-link" href="#work" data-track="hero_proof">See the proof <span aria-hidden="true">↗</span></a>
         </div>
 
         <dl class="trust-strip" aria-label="Experience highlights">
@@ -105,9 +108,6 @@
       </aside>
 
       <div class="hero-utility">
-        <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false">
-          <span aria-hidden="true">♪</span> Ambient sound off
-        </button>
         <span>Native scroll / keyboard ready</span>
       </div>
     </section>
@@ -135,24 +135,26 @@
           <div class="map-label map-label-a" aria-hidden="true">44.97° N</div>
           <div class="map-label map-label-b" aria-hidden="true">93.26° W</div>
 
-          <button class="pipeline-node node-0 is-active" type="button" data-stage="0" style="--x:9%; --y:81%" aria-pressed="true">
-            <span>01</span><b>Inquiry</b>
-          </button>
-          <button class="pipeline-node node-1" type="button" data-stage="1" style="--x:24%; --y:53%" aria-pressed="false">
-            <span>02</span><b>Voice</b>
-          </button>
-          <button class="pipeline-node node-2" type="button" data-stage="2" style="--x:41%; --y:49%" aria-pressed="false">
-            <span>03</span><b>Intent</b>
-          </button>
-          <button class="pipeline-node node-3" type="button" data-stage="3" style="--x:57%; --y:47%" aria-pressed="false">
-            <span>04</span><b>CRM</b>
-          </button>
-          <button class="pipeline-node node-4" type="button" data-stage="4" style="--x:72%; --y:34%" aria-pressed="false">
-            <span>05</span><b>Follow-up</b>
-          </button>
-          <button class="pipeline-node node-5" type="button" data-stage="5" style="--x:90%; --y:17%" aria-pressed="false">
-            <span>06</span><b>Meeting</b>
-          </button>
+          <div class="pipeline-tabs" role="tablist" aria-label="Lead pipeline stages">
+            <button class="pipeline-node node-0 is-active" id="pipeline-tab-0" type="button" role="tab" data-stage="0" style="--x:9%; --y:81%" aria-selected="true" aria-controls="stage-readout" tabindex="0">
+              <span>01</span><b>Inquiry</b>
+            </button>
+            <button class="pipeline-node node-1" id="pipeline-tab-1" type="button" role="tab" data-stage="1" style="--x:24%; --y:53%" aria-selected="false" aria-controls="stage-readout" tabindex="-1">
+              <span>02</span><b>Voice</b>
+            </button>
+            <button class="pipeline-node node-2" id="pipeline-tab-2" type="button" role="tab" data-stage="2" style="--x:41%; --y:49%" aria-selected="false" aria-controls="stage-readout" tabindex="-1">
+              <span>03</span><b>Intent</b>
+            </button>
+            <button class="pipeline-node node-3" id="pipeline-tab-3" type="button" role="tab" data-stage="3" style="--x:57%; --y:47%" aria-selected="false" aria-controls="stage-readout" tabindex="-1">
+              <span>04</span><b>CRM</b>
+            </button>
+            <button class="pipeline-node node-4" id="pipeline-tab-4" type="button" role="tab" data-stage="4" style="--x:72%; --y:34%" aria-selected="false" aria-controls="stage-readout" tabindex="-1">
+              <span>05</span><b>Follow-up</b>
+            </button>
+            <button class="pipeline-node node-5" id="pipeline-tab-5" type="button" role="tab" data-stage="5" style="--x:90%; --y:17%" aria-selected="false" aria-controls="stage-readout" tabindex="-1">
+              <span>06</span><b>Meeting</b>
+            </button>
+          </div>
 
           <a class="project-parcel parcel-wyn" href="#wyn" data-project="wyn" style="--x:53%; --y:17%">
             <span>In production</span><b>WYN Intelligence</b>
@@ -162,7 +164,7 @@
           </a>
         </div>
 
-        <aside class="stage-readout" aria-live="polite" aria-atomic="true">
+        <aside class="stage-readout" id="stage-readout" role="tabpanel" aria-labelledby="pipeline-tab-0" aria-live="polite" aria-atomic="true" tabindex="0">
           <div class="readout-topline">
             <span id="stage-index">Stage 01 / 06</span>
             <span id="stage-status">Signal received</span>
@@ -225,7 +227,7 @@
             <p class="case-kicker">Real estate growth system / Live</p>
             <h3>Miguel Closes</h3>
           </div>
-          <a class="case-link" href="https://miguelcloses.com" target="_blank" rel="noreferrer">Visit live site <span aria-hidden="true">↗</span></a>
+          <a class="case-link" href="https://miguelcloses.com" target="_blank" rel="noreferrer" data-track="project_outbound" data-track-label="miguel-closes">Visit live site <span aria-hidden="true">↗</span></a>
         </header>
 
         <div class="case-layout">
@@ -256,72 +258,34 @@
         </figure>
       </article>
 
-      <article class="case-study reveal" id="neurospark">
-        <header class="case-header">
-          <div>
-            <p class="case-kicker">Founder venture / Live</p>
-            <h3>Neurospark</h3>
-          </div>
-          <a class="case-link" href="https://neurosparkmarketing.com" target="_blank" rel="noreferrer">Visit live site <span aria-hidden="true">↗</span></a>
+      <section class="adjacent-builds reveal" aria-labelledby="adjacent-title">
+        <header class="adjacent-heading">
+          <p class="eyebrow"><span>Adjacent builds</span> / Product range</p>
+          <h3 id="adjacent-title">The same operating discipline, tested outside the core CRE brief.</h3>
         </header>
 
-        <div class="case-layout">
-          <div class="case-story">
-            <p class="case-lede">Danilo’s own AI marketing company: autonomous agents that live in a client’s stack and ship marketing work around the clock.</p>
-            <div class="case-facts">
-              <div><span>Problem</span><p>Marketing execution stalls when every asset waits on a person.</p></div>
-              <div><span>Danilo’s role</span><p>Founder. Brand, site, agent architecture, and delivery systems.</p></div>
-              <div><span>Evidence</span><p>The public site and the business behind it are live.</p></div>
+        <div class="build-ledger">
+          <article id="neurospark">
+            <div class="build-index"><span>Live venture</span><b>01</b></div>
+            <div class="build-summary">
+              <h4>Neurospark</h4>
+              <p>An AI marketing company built around agents, delivery systems, and repeatable production loops.</p>
             </div>
-          </div>
+            <div class="build-role"><span>Role</span><p>Founder, brand, site, agent architecture, and delivery.</p></div>
+            <a class="case-link" href="https://neurosparkmarketing.com" target="_blank" rel="noreferrer" data-track="project_outbound" data-track-label="neurospark">Visit live site <span aria-hidden="true">↗</span></a>
+          </article>
 
-          <div class="system-map" aria-label="Neurospark system map">
-            <div class="system-map-head"><span>System map / Neurospark</span><span>Live</span></div>
-            <div class="system-flow flow-neurospark">
-              <span>Brief</span><i>→</i><span>Agents</span><i>→</i><span>Assets</span>
-              <span>Channels</span><i>→</i><span>Signal</span><i>→</i><span>Next cycle</span>
+          <article id="microcommit" data-project-card="micro">
+            <div class="build-index"><span>iOS build</span><b>02</b></div>
+            <div class="build-summary">
+              <h4>MicroCommit</h4>
+              <p>An AI-guided habit product for testing adaptive coaching, behavioral loops, and community accountability.</p>
             </div>
-            <p>Marketing that ships on a loop, not on request.</p>
-          </div>
+            <div class="build-role"><span>Role</span><p>Product design, application build, behavioral model, and AI coach.</p></div>
+            <span class="build-status">Active build</span>
+          </article>
         </div>
-        <figure class="live-proof">
-          <picture>
-            <source type="image/avif" srcset="/neurospark-live.avif">
-            <img src="/neurospark-live.jpg" alt="The live Neurospark website homepage" width="1280" height="720" loading="lazy" decoding="async">
-          </picture>
-          <figcaption><span>Public interface</span><b>neurosparkmarketing.com</b><small>Live site verified July 2026</small></figcaption>
-        </figure>
-      </article>
-
-      <article class="case-study case-lab reveal" id="microcommit" data-project-card="micro">
-        <header class="case-header">
-          <div>
-            <p class="case-kicker">AI product lab / iOS build</p>
-            <h3>MicroCommit</h3>
-          </div>
-          <span class="lab-badge">Product range</span>
-        </header>
-
-        <div class="case-layout">
-          <div class="case-story">
-            <p class="case-lede">An AI-guided habit product built to test adaptive coaching, behavioral loops, and community accountability outside the CRE domain.</p>
-            <div class="case-facts">
-              <div><span>Why it belongs</span><p>It shows product judgment and AI integration beyond workflow automation.</p></div>
-              <div><span>Danilo’s role</span><p>Product design, application build, behavioral model, and AI coach.</p></div>
-              <div><span>Status</span><p>Active product build for iOS.</p></div>
-            </div>
-          </div>
-
-          <div class="system-map" aria-label="MicroCommit product loop">
-            <div class="system-map-head"><span>Product loop / Lab</span><span>Build</span></div>
-            <div class="system-flow flow-micro">
-              <span>Commitment</span><i>→</i><span>Action</span><i>→</i><span>Streak</span>
-              <span>Behavior</span><i>→</i><span>AI coach</span><i>→</i><span>Next nudge</span>
-            </div>
-            <p>A compact feedback system shaped around actual behavior.</p>
-          </div>
-        </div>
-      </article>
+      </section>
     </section>
 
     <section class="record scene-section" id="record" data-scene="record" aria-labelledby="record-title">
@@ -377,7 +341,7 @@
       <header class="section-heading diagnostic-heading reveal">
         <p class="eyebrow"><span>Pipeline diagnostic</span> / Three questions</p>
         <h2 id="diagnostic-title">Find the first handoff worth fixing.</h2>
-        <p>This does not send any data. It creates a starting point for your system review.</p>
+        <p>Your answers stay in this browser. They create a starting point for your system review.</p>
       </header>
 
       <form class="diagnostic-form reveal" id="pipeline-diagnostic">
@@ -412,11 +376,11 @@
       </form>
 
       <div class="diagnostic-result" id="diagnostic-result" hidden tabindex="-1" aria-live="polite">
-        <p class="eyebrow"><span>Your starting map</span> / No data was sent</p>
+        <p class="eyebrow"><span>Your starting map</span> / Answers kept in browser</p>
         <h3 id="result-title"></h3>
         <p id="result-copy"></p>
         <ol id="result-steps"></ol>
-        <button class="button button-primary" type="button" data-open-contact>Book a system review</button>
+        <button class="button button-primary" type="button" data-open-contact data-contact-source="diagnostic">Request a system review</button>
       </div>
     </section>
   </main>
@@ -426,11 +390,11 @@
       <span class="brand-name">Danilo Ojeda</span>
       <p>AI systems for commercial real estate.</p>
     </div>
-    <button class="footer-cta" type="button" data-open-contact>Start a conversation <span aria-hidden="true">↗</span></button>
+    <button class="footer-cta" type="button" data-open-contact data-contact-source="footer">Start a conversation <span aria-hidden="true">↗</span></button>
     <nav aria-label="Social links">
-      <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a>
-      <a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a>
-      <a href="mailto:danilo@neurosparkmarketing.com">Email</a>
+      <a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer" data-track="social_outbound" data-track-label="linkedin">LinkedIn</a>
+      <a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer" data-track="social_outbound" data-track-label="instagram">Instagram</a>
+      <a href="mailto:danilo@neurosparkmarketing.com" data-track="email_link">Email</a>
     </nav>
     <small>© <span id="current-year">2026</span> Danilo Ojeda</small>
   </footer>
@@ -439,21 +403,23 @@
     <div class="dialog-head">
       <div>
         <p class="eyebrow"><span>System review</span> / Direct to Danilo</p>
-        <h2 id="contact-title">Map the next handoff.</h2>
+        <h2 id="contact-title">Request a system review.</h2>
       </div>
       <button class="dialog-close" type="button" data-close-contact aria-label="Close contact form">Close</button>
     </div>
     <p class="dialog-intro">Tell me where your pipeline loses context or time. I reply within one business day.</p>
     <form id="contact-form" novalidate>
       <input type="text" name="_honey" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input type="hidden" name="submissionId">
       <div class="form-row">
         <label>Name<input required name="name" type="text" autocomplete="name" maxlength="120"></label>
         <label>Email<input required name="email" type="email" autocomplete="email" maxlength="200"></label>
       </div>
       <label>Company<input name="company" type="text" autocomplete="organization" maxlength="160"></label>
-      <label>What should the system fix first?<textarea required name="message" rows="5" maxlength="2000"></textarea></label>
+      <label>What should the system fix first?<textarea required name="message" rows="5" minlength="20" maxlength="2000"></textarea></label>
       <button class="button button-primary" type="submit">Send the system brief</button>
       <p class="form-status" id="form-status" role="status"></p>
+      <p class="form-privacy">Your details are used only to reply to this request. Delivery is handled by Resend. Prefer email? <a href="mailto:danilo@neurosparkmarketing.com">danilo@neurosparkmarketing.com</a>.</p>
     </form>
   </dialog>
 
