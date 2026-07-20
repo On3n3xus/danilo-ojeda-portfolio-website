@@ -1,4 +1,5 @@
 import "./style.css";
+import { inject, track } from "@vercel/analytics";
 import type { AtlasProject, AtlasSceneController } from "./atlas-scene";
 
 const $ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => {
@@ -10,30 +11,79 @@ const $ = <T extends Element = HTMLElement>(selector: string, root: ParentNode =
 const $$ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) =>
   [...root.querySelectorAll<T>(selector)];
 
+const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const analyticsEnabled = import.meta.env.PROD && !isLocalHost;
+
+if (analyticsEnabled) inject();
+
+function trackEvent(name: string, properties?: Record<string, string | number | boolean>) {
+  if (!analyticsEnabled) return;
+  try {
+    track(name, properties);
+  } catch (error) {
+    console.warn("Analytics event could not be recorded.", error);
+  }
+}
+
+for (const target of $$<HTMLElement>("[data-track]")) {
+  target.addEventListener("click", () => {
+    const name = target.dataset.track;
+    if (!name) return;
+    const label = target.dataset.trackLabel;
+    trackEvent(name, label ? { label } : undefined);
+  });
+}
+
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const mobileNav = window.matchMedia("(max-width: 1050px)");
 const sceneMount = $("#atlas-scene");
 
 let atlasScene: AtlasSceneController | null = null;
 
+type CapabilityNavigator = Navigator & {
+  connection?: { saveData?: boolean; effectiveType?: string };
+  deviceMemory?: number;
+};
+
+function canStartAtlasScene() {
+  const capability = navigator as CapabilityNavigator;
+  const connection = capability.connection;
+  const constrainedNetwork = connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType || "");
+  const constrainedMemory = typeof capability.deviceMemory === "number" && capability.deviceMemory <= 4;
+  if (reducedMotion.matches || constrainedNetwork || constrainedMemory) return false;
+
+  const testCanvas = document.createElement("canvas");
+  const context = testCanvas.getContext("webgl2") || testCanvas.getContext("webgl");
+  context?.getExtension("WEBGL_lose_context")?.loseContext();
+  return Boolean(context);
+}
+
+function showStaticAtlas() {
+  sceneMount.setAttribute("hidden", "");
+  document.body.dataset.atlasMode = "static";
+}
+
 async function startAtlasScene() {
   try {
     const { createAtlasScene } = await import("./atlas-scene");
     atlasScene = createAtlasScene(sceneMount, {
       initialSection: document.body.dataset.scene || "night",
-      reducedMotion: reducedMotion.matches,
+      reducedMotion: false,
     });
+    document.body.dataset.atlasMode = "webgl";
     updatePageState();
   } catch (error) {
-    sceneMount.setAttribute("hidden", "");
+    showStaticAtlas();
     console.warn("The decorative atlas scene could not start.", error);
   }
 }
 
-if ("requestIdleCallback" in window) {
-  window.requestIdleCallback(() => void startAtlasScene(), { timeout: 700 });
+if (!canStartAtlasScene()) {
+  showStaticAtlas();
+} else if ("requestIdleCallback" in window) {
+  window.requestIdleCallback(() => void startAtlasScene(), { timeout: 900 });
 } else {
-  setTimeout(() => void startAtlasScene(), 80);
+  setTimeout(() => void startAtlasScene(), 120);
 }
 
 type PipelineStage = {
@@ -96,7 +146,8 @@ const pipelineStages: PipelineStage[] = [
   },
 ];
 
-const stageNodes = $$(".pipeline-node");
+const stageNodes = $$<HTMLButtonElement>(".pipeline-node");
+const stageReadout = $("#stage-readout");
 const stageIndex = $("#stage-index");
 const stageStatus = $("#stage-status");
 const stageTitle = $("#stage-title");
@@ -109,7 +160,7 @@ const previousStage = $<HTMLButtonElement>("#stage-prev");
 const nextStage = $<HTMLButtonElement>("#stage-next");
 let activeStage = 0;
 
-function setPipelineStage(index: number, announce = true) {
+function setPipelineStage(index: number, recordInteraction = false) {
   activeStage = Math.max(0, Math.min(pipelineStages.length - 1, index));
   const stage = pipelineStages[activeStage];
   const displayIndex = String(activeStage + 1).padStart(2, "0");
@@ -117,7 +168,8 @@ function setPipelineStage(index: number, announce = true) {
   stageNodes.forEach((node, nodeIndex) => {
     const active = nodeIndex === activeStage;
     node.classList.toggle("is-active", active);
-    node.setAttribute("aria-pressed", String(active));
+    node.setAttribute("aria-selected", String(active));
+    node.tabIndex = active ? 0 : -1;
   });
 
   stageIndex.textContent = `Stage ${displayIndex} / 06`;
@@ -131,21 +183,32 @@ function setPipelineStage(index: number, announce = true) {
   previousStage.disabled = activeStage === 0;
   nextStage.disabled = activeStage === pipelineStages.length - 1;
   nextStage.textContent = activeStage === pipelineStages.length - 1 ? "Pipeline complete" : "Next stage";
+  stageReadout.setAttribute("aria-labelledby", stageNodes[activeStage].id);
   atlasScene?.focusProject(stage.project);
 
-  if (announce) stageTitle.setAttribute("data-updated", String(Date.now()));
+  if (recordInteraction) trackEvent("pipeline_stage_selected", { stage: activeStage + 1 });
 }
 
 stageNodes.forEach((node) => {
   const index = Number(node.getAttribute("data-stage"));
-  node.addEventListener("click", () => setPipelineStage(index));
-  node.addEventListener("pointerenter", () => setPipelineStage(index, false));
-  node.addEventListener("focus", () => setPipelineStage(index, false));
+  node.addEventListener("click", () => setPipelineStage(index, true));
+  node.addEventListener("focus", () => setPipelineStage(index));
+  node.addEventListener("keydown", (event) => {
+    let nextIndex: number | null = null;
+    if (["ArrowRight", "ArrowDown"].includes(event.key)) nextIndex = (index + 1) % stageNodes.length;
+    if (["ArrowLeft", "ArrowUp"].includes(event.key)) nextIndex = (index - 1 + stageNodes.length) % stageNodes.length;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = stageNodes.length - 1;
+    if (nextIndex === null) return;
+    event.preventDefault();
+    setPipelineStage(nextIndex, true);
+    stageNodes[nextIndex].focus();
+  });
 });
 
-previousStage.addEventListener("click", () => setPipelineStage(activeStage - 1));
-nextStage.addEventListener("click", () => setPipelineStage(activeStage + 1));
-setPipelineStage(0, false);
+previousStage.addEventListener("click", () => setPipelineStage(activeStage - 1, true));
+nextStage.addEventListener("click", () => setPipelineStage(activeStage + 1, true));
+setPipelineStage(0);
 
 const projectTargets = $$<HTMLElement>("[data-project], [data-project-card]");
 for (const target of projectTargets) {
@@ -293,54 +356,6 @@ window.addEventListener("scroll", requestPageUpdate, { passive: true });
 window.addEventListener("resize", requestPageUpdate, { passive: true });
 updatePageState();
 
-const soundToggle = $<HTMLButtonElement>("#sound-toggle");
-let audioContext: AudioContext | null = null;
-let soundMaster: GainNode | null = null;
-let soundOn = false;
-
-function initializeSound() {
-  if (audioContext) return;
-  const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioContextClass) return;
-  audioContext = new AudioContextClass();
-  soundMaster = audioContext.createGain();
-  soundMaster.gain.value = 0;
-  soundMaster.connect(audioContext.destination);
-
-  const filter = audioContext.createBiquadFilter();
-  filter.type = "lowpass";
-  filter.frequency.value = 360;
-  filter.Q.value = 0.7;
-  filter.connect(soundMaster);
-
-  [55, 82.41, 110].forEach((frequency, index) => {
-    const oscillator = audioContext!.createOscillator();
-    oscillator.type = index === 0 ? "sine" : "triangle";
-    oscillator.frequency.value = frequency;
-    oscillator.detune.value = index === 1 ? -5 : index === 2 ? 4 : 0;
-    const gain = audioContext!.createGain();
-    gain.gain.value = index === 0 ? 0.05 : 0.018;
-    oscillator.connect(gain).connect(filter);
-    oscillator.start();
-  });
-}
-
-soundToggle.addEventListener("click", async () => {
-  initializeSound();
-  if (!audioContext || !soundMaster) {
-    soundToggle.textContent = "Ambient sound unavailable";
-    return;
-  }
-  await audioContext.resume();
-  soundOn = !soundOn;
-  const now = audioContext.currentTime;
-  soundMaster.gain.cancelScheduledValues(now);
-  soundMaster.gain.setValueAtTime(soundMaster.gain.value, now);
-  soundMaster.gain.linearRampToValueAtTime(soundOn ? 0.55 : 0, now + 0.6);
-  soundToggle.setAttribute("aria-pressed", String(soundOn));
-  soundToggle.innerHTML = `<span aria-hidden="true">♪</span> Ambient sound ${soundOn ? "on" : "off"}`;
-});
-
 type DiagnosticAnswer = {
   title: string;
   copy: string;
@@ -348,37 +363,51 @@ type DiagnosticAnswer = {
 };
 
 function buildDiagnostic(source: string, speed: string, record: string): DiagnosticAnswer {
-  if (record !== "crm") {
-    return {
-      title: "Start with one operational record.",
-      copy: "Automation will amplify confusion if ownership, context, and next actions still live across inboxes and spreadsheets.",
-      steps: [
-        "Define the fields and owner for every new opportunity.",
-        "Route each entry source into one shared record.",
-        speed === "fast" ? "Preserve your response speed while making the handoff visible." : "Add an immediate acknowledgment and a timed owner alert.",
-      ],
-    };
-  }
+  const sourcePlans: Record<string, string> = {
+    calls: "Turn each call or voicemail into a transcript, structured intent, and a named owner.",
+    forms: "Keep form, campaign, property, and attribution data attached to the opportunity.",
+    mixed: "Route calls, forms, and campaigns through one intake contract before branching the workflow.",
+  };
+  const recordPlans: Record<string, string> = {
+    crm: "Update one CRM record with the source, context, owner, and approved next action.",
+    sheets: "Replace spreadsheet and inbox handoffs with one operational record and a defined field set.",
+    scattered: "Choose one system of record, then make every other tool read from or write to it deliberately.",
+  };
+  const speedPlans: Record<string, string> = {
+    fast: "Preserve the five-minute response while logging the handoff and its outcome.",
+    day: "Send an immediate acknowledgment, then alert the owner before the same-day response window expires.",
+    unknown: "Set a response-time target, escalation rule, and measurement before adding more automation.",
+  };
 
-  if (speed === "unknown") {
-    return {
-      title: "Close the response-time gap first.",
-      copy: "You already have a system of record. The next gain is making every inquiry visible and owned before interest cools.",
-      steps: [
-        `Capture ${source === "calls" ? "calls and voicemails" : "every lead source"} in the CRM automatically.`,
-        "Set a clear response window and escalation rule.",
-        "Measure the handoff before expanding the nurture sequence.",
-      ],
-    };
+  let title = "Connect the source to the next action.";
+  let copy = "Your foundation can support a cleaner handoff. Preserve context, ownership, and outcome data as the opportunity moves.";
+
+  if (record !== "crm") {
+    title = "Start with one operational record.";
+    copy = record === "sheets"
+      ? "Spreadsheets can support analysis, but they should not own a live handoff between inquiry and follow-up."
+      : "Automation will amplify confusion until every source agrees on where ownership and next actions live.";
+  } else if (speed === "unknown") {
+    title = "Close the response-time gap first.";
+    copy = "The CRM foundation is present. The next gain is making every inquiry visible and owned before interest cools.";
+  } else if (speed === "day") {
+    title = "Shorten the unowned window.";
+    copy = "The opportunity reaches a trusted record, but the response path still needs an immediate acknowledgment and a timed owner alert.";
+  } else if (source === "calls") {
+    title = "Structure the conversation at entry.";
+    copy = "Fast response and a trusted CRM are strong foundations. Preserve what the caller asked for before the conversation becomes another note.";
+  } else if (source === "mixed") {
+    title = "Unify intake before expanding automation.";
+    copy = "The CRM and response speed are working. Standardize how each source enters so attribution and ownership stay consistent.";
   }
 
   return {
-    title: source === "calls" ? "Structure the conversation at entry." : "Connect the source to the next action.",
-    copy: "Your foundation is stronger than most. Focus on preserving intent and attribution as the opportunity moves into follow-up.",
+    title,
+    copy,
     steps: [
-      source === "calls" ? "Turn each call into structured intent and a complete transcript." : "Keep source and campaign context attached to the lead.",
-      "Assign the correct owner and approved next action.",
-      "Close the loop with booking status and outcome data.",
+      sourcePlans[source] || sourcePlans.mixed,
+      recordPlans[record] || recordPlans.scattered,
+      speedPlans[speed] || speedPlans.unknown,
     ],
   };
 }
@@ -407,6 +436,7 @@ diagnosticForm.addEventListener("submit", (event) => {
     return item;
   }));
   diagnosticSummary = `${answer.title}\n\n${answer.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}`;
+  trackEvent("diagnostic_completed");
   diagnosticResult.hidden = false;
   diagnosticResult.focus({ preventScroll: true });
   diagnosticResult.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "center" });
@@ -415,18 +445,27 @@ diagnosticForm.addEventListener("submit", (event) => {
 const contactDialog = $<HTMLDialogElement>("#contact-dialog");
 const contactForm = $<HTMLFormElement>("#contact-form");
 const contactMessage = $<HTMLTextAreaElement>('textarea[name="message"]', contactForm);
+const contactSubmissionId = $<HTMLInputElement>('input[name="submissionId"]', contactForm);
 const closeContact = $<HTMLButtonElement>("[data-close-contact]");
 const formStatus = $<HTMLElement>("#form-status");
 const contactSubmit = $<HTMLButtonElement>('button[type="submit"]', contactForm);
 let contactOpener: HTMLElement | null = null;
 
+function prepareContactForm() {
+  contactSubmissionId.value = crypto.randomUUID();
+}
+
 for (const opener of $$<HTMLButtonElement>("[data-open-contact]")) {
   opener.addEventListener("click", () => {
     contactOpener = opener;
+    formStatus.className = "form-status";
+    formStatus.textContent = "";
+    prepareContactForm();
     if (diagnosticSummary && !contactMessage.value) {
       contactMessage.value = `My pipeline starting map:\n\n${diagnosticSummary}\n\nWhat I want to improve:\n`;
     }
     contactDialog.showModal();
+    trackEvent("contact_opened", { source: opener.dataset.contactSource || "unknown" });
   });
 }
 
@@ -445,26 +484,34 @@ contactForm.addEventListener("submit", async (event) => {
   contactSubmit.disabled = true;
   formStatus.className = "form-status";
   formStatus.textContent = "Sending your system brief...";
+  let failureMessage = "The form could not send.";
   try {
-    const response = await fetch("https://formsubmit.co/ajax/danilo@neurosparkmarketing.com", {
+    const response = await fetch("/api/contact", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({
-        name: data.name,
-        email: data.email,
-        company: data.company || "Not provided",
-        message: data.message,
-        _subject: "New system review request from daniloojeda.com",
-        _template: "table",
+        name: String(data.name || ""),
+        email: String(data.email || ""),
+        company: String(data.company || ""),
+        message: String(data.message || ""),
+        _honey: String(data._honey || ""),
+        submissionId: String(data.submissionId || ""),
       }),
     });
-    if (!response.ok) throw new Error(String(response.status));
+    const result = await response.json().catch(() => ({ error: "" })) as { error?: string };
+    if (!response.ok) {
+      failureMessage = result.error || failureMessage;
+      throw new Error(String(response.status));
+    }
     formStatus.className = "form-status success";
     formStatus.textContent = "System brief received. Danilo will reply within one business day.";
     contactForm.reset();
+    prepareContactForm();
+    trackEvent("contact_submitted");
   } catch {
     formStatus.className = "form-status error";
-    formStatus.textContent = "The form could not send. Email danilo@neurosparkmarketing.com instead.";
+    formStatus.textContent = `${failureMessage} Email danilo@neurosparkmarketing.com instead.`;
   } finally {
     contactSubmit.disabled = false;
   }
@@ -474,5 +521,4 @@ $("#current-year").textContent = String(new Date().getFullYear());
 
 window.addEventListener("pagehide", () => {
   atlasScene?.destroy();
-  if (audioContext) void audioContext.close();
 }, { once: true });

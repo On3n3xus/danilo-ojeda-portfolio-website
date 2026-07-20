@@ -3,6 +3,8 @@ dist/
 .vercel/
 .DS_Store
 *.local
+.env.local
+.env.*.local
 
 verification-*.png
 .firecrawl/

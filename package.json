@@ -4,12 +4,20 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npx --yes vercel@54.20.0 dev",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "qa": "node qa-flight.mjs",
+    "test:contact": "node --test tests/contact-api.test.mjs",
+    "check:links": "node scripts/check-external-links.mjs",
+    "verify": "npm run lint && npm run build && npm run test:contact && npm run test:a11y && npm run test:config",
+    "test:a11y": "node --test tests/markup-accessibility.test.mjs",
+    "test:config": "node --test tests/vercel-config.test.mjs",
+    "dev:vite": "vite"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "three": "^0.185.1"
   },
   "devDependencies": {
