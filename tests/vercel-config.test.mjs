@@ -16,9 +16,9 @@ test('ships strict transport and content security headers', () => {
     "frame-ancestors 'none'",
     "form-action 'self'",
     "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data:",
-    "font-src 'self'",
+    "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://vitals.vercel-insights.com",
     'upgrade-insecure-requests',
   ]) assert.ok(policy.includes(directive), `missing CSP directive: ${directive}`)
