@@ -227,3 +227,98 @@ test('caps the in-memory limiter under distributed traffic', async (context) => 
   }))
   assert.equal(limited.status, 429)
 })
+
+
+test('cancels a declared oversized body before returning 413', async () => {
+  let cancelled = false
+  const stream = new ReadableStream({
+    pull() {
+      return new Promise(() => {})
+    },
+    cancel() {
+      cancelled = true
+    },
+  })
+  const request = new Request('https://daniloojeda.com/api/contact', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': '12001',
+      Origin: 'https://daniloojeda.com',
+    },
+    body: stream,
+    duplex: 'half',
+  })
+  const response = await contact.fetch(request)
+  assert.equal(response.status, 413)
+  assert.equal(cancelled, true)
+})
+
+test('times out and cancels a stalled request body', async (context) => {
+  const originalTimeout = AbortSignal.timeout
+  let requestedTimeout = 0
+  let cancelled = false
+  AbortSignal.timeout = (milliseconds) => {
+    requestedTimeout = milliseconds
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(new DOMException('Timed out', 'TimeoutError')), 10)
+    return controller.signal
+  }
+  context.after(() => {
+    AbortSignal.timeout = originalTimeout
+  })
+
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('{"name":"Partial'))
+    },
+    pull() {
+      return new Promise(() => {})
+    },
+    cancel() {
+      cancelled = true
+    },
+  })
+  const request = new Request('https://daniloojeda.com/api/contact', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'https://daniloojeda.com',
+    },
+    body: stream,
+    duplex: 'half',
+  })
+  const result = await Promise.race([
+    contact.fetch(request),
+    new Promise((resolve) => setTimeout(() => resolve('timed-out'), 100)),
+  ])
+  assert.notEqual(result, 'timed-out')
+  assert.ok(result instanceof Response)
+  assert.equal(result.status, 408)
+  assert.equal(requestedTimeout, 5_000)
+  assert.equal(cancelled, true)
+})
+
+
+test('cancels provider response bodies on accepted and rejected deliveries', async (context) => {
+  const statuses = [200, 429]
+  let cancellations = 0
+  configureDelivery(context, async () => new Response(new ReadableStream({
+    pull() {
+      return new Promise(() => {})
+    },
+    cancel() {
+      cancellations += 1
+    },
+  }), { status: statuses.shift() }))
+
+  const accepted = await contact.fetch(contactRequest(validPayload(), {
+    'X-Forwarded-For': 'provider-response-source-1',
+  }))
+  const rejected = await contact.fetch(contactRequest(validPayload(), {
+    'X-Forwarded-For': 'provider-response-source-2',
+  }))
+  assert.equal(accepted.status, 200)
+  assert.equal(rejected.status, 502)
+  assert.equal(cancellations, 2)
+})

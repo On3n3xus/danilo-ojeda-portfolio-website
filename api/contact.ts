@@ -17,6 +17,7 @@ type RateLimitEntry = {
 };
 
 const MAX_BODY_BYTES = 12_000;
+const REQUEST_BODY_TIMEOUT_MS = 5_000;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_MAX_ENTRIES = 500;
@@ -137,16 +138,26 @@ export default {
     if (!contentType.includes("application/json")) {
       return json({ error: "The request format is not supported." }, 415);
     }
-    if (declaredSize > MAX_BODY_BYTES) return json({ error: "The request is too large." }, 413);
+    if (declaredSize > MAX_BODY_BYTES) {
+      await request.body?.cancel().catch(() => undefined);
+      return json({ error: "The request is too large." }, 413);
+    }
 
     let rawBody = "";
     const reader = request.body?.getReader();
     if (reader) {
       const decoder = new TextDecoder();
+      const bodySignal = AbortSignal.any([request.signal, AbortSignal.timeout(REQUEST_BODY_TIMEOUT_MS)]);
+      let abortBody: (() => void) | undefined;
+      const bodyAborted = new Promise<never>((_, reject) => {
+        abortBody = () => reject(bodySignal.reason || new DOMException("Timed out", "TimeoutError"));
+        if (bodySignal.aborted) abortBody();
+        else bodySignal.addEventListener("abort", abortBody, { once: true });
+      });
       let receivedBytes = 0;
       try {
         while (true) {
-          const { done, value } = await reader.read();
+          const { done, value } = await Promise.race([reader.read(), bodyAborted]);
           if (done) break;
           receivedBytes += value.byteLength;
           if (receivedBytes > MAX_BODY_BYTES) {
@@ -157,7 +168,11 @@ export default {
         }
         rawBody += decoder.decode();
       } catch {
+        await reader.cancel().catch(() => undefined);
+        if (bodySignal.aborted) return json({ error: "The request body timed out." }, 408);
         return json({ error: "The request body could not be read." }, 400);
+      } finally {
+        if (abortBody) bodySignal.removeEventListener("abort", abortBody);
       }
     }
 
@@ -222,6 +237,7 @@ export default {
         }),
       });
 
+      if (resendResponse.body) await resendResponse.body.cancel().catch(() => undefined);
       if (!resendResponse.ok) {
         log("error", "contact_email_provider_failed", request, started, { providerStatus: resendResponse.status });
         return json({ error: "Contact email is temporarily unavailable." }, 502);
