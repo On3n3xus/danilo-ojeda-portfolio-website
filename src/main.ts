@@ -1,5 +1,7 @@
 import "./style.css";
 import type { AtlasProject, AtlasSceneController } from "./atlas-scene";
+import { createSignalRun, getSignalMode } from "./signal-run";
+import { createAtlasModeController, createPagehideCleanup } from "./signal-run-lifecycle";
 
 const $ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => {
   const element = root.querySelector<T>(selector);
@@ -13,28 +15,46 @@ const $$ = <T extends Element = HTMLElement>(selector: string, root: ParentNode 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const mobileNav = window.matchMedia("(max-width: 1050px)");
 const sceneMount = $("#atlas-scene");
+const saveData = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+const getCurrentSignalMode = () => getSignalMode({
+  reducedMotion: reducedMotion.matches,
+  saveData,
+  viewportWidth: window.innerWidth,
+});
+const initialSignalMode = getCurrentSignalMode();
+const signalRun = createSignalRun($("#signal-run"));
 
 let atlasScene: AtlasSceneController | null = null;
-
-async function startAtlasScene() {
-  try {
+const atlasMode = createAtlasModeController<AtlasSceneController>({
+  mount: sceneMount,
+  load: async () => {
     const { createAtlasScene } = await import("./atlas-scene");
-    atlasScene = createAtlasScene(sceneMount, {
+    return () => createAtlasScene(sceneMount, {
       initialSection: document.body.dataset.scene || "night",
       reducedMotion: reducedMotion.matches,
     });
-    updatePageState();
-  } catch (error) {
-    sceneMount.setAttribute("hidden", "");
+  },
+  onSceneChange: (scene) => {
+    atlasScene = scene;
+    if (scene) updatePageState();
+  },
+  onError: (error) => {
     console.warn("The decorative atlas scene could not start.", error);
-  }
-}
+  },
+});
+const syncAtlasMode = () => atlasMode.sync(getCurrentSignalMode());
 
-if ("requestIdleCallback" in window) {
-  window.requestIdleCallback(() => void startAtlasScene(), { timeout: 700 });
+if (initialSignalMode === "cinematic") {
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(syncAtlasMode, { timeout: 700 });
+  } else {
+    setTimeout(syncAtlasMode, 80);
+  }
 } else {
-  setTimeout(() => void startAtlasScene(), 80);
+  syncAtlasMode();
 }
+window.addEventListener("resize", syncAtlasMode, { passive: true });
+reducedMotion.addEventListener("change", syncAtlasMode);
 
 type PipelineStage = {
   status: string;
@@ -472,7 +492,10 @@ contactForm.addEventListener("submit", async (event) => {
 
 $("#current-year").textContent = String(new Date().getFullYear());
 
-window.addEventListener("pagehide", () => {
-  atlasScene?.destroy();
+createPagehideCleanup(window, () => {
+  window.removeEventListener("resize", syncAtlasMode);
+  reducedMotion.removeEventListener("change", syncAtlasMode);
+  signalRun.destroy();
+  atlasMode.destroy();
   if (audioContext) void audioContext.close();
-}, { once: true });
+});
