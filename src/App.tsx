@@ -143,6 +143,6 @@ export default function App() {
       <img src="/assets/contact-plate.png" alt="A luminous signal arriving at its final aperture" loading="lazy" />
       <div className="contact-copy"><p>Start with the first broken handoff.</p><h2 id="contact-title">Map your pipeline.</h2><a href="mailto:danilo@neurosparkmarketing.com">Start a conversation</a></div>
     </section>
-    <footer><p>Danilo Ojeda</p><nav aria-label="Social links"><a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com/DaniloOjedaCRE" target="_blank" rel="noreferrer">Facebook</a></nav><small>AI systems for commercial real estate</small></footer>
+    <footer><p>Danilo Ojeda</p><nav aria-label="Social links"><a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com/dloojeda" target="_blank" rel="noreferrer">Facebook</a></nav><small>AI systems for commercial real estate</small></footer>
   </main>;
 }
