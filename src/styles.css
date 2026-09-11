@@ -28,6 +28,7 @@ footer{min-height:160px;padding:34px clamp(24px,6vw,96px);display:grid;grid-temp
 .project-index .project-row:nth-child(2){transition-delay:.07s}
 .project-index .project-row:nth-child(3){transition-delay:.14s}
 .project-index .project-row:nth-child(4){transition-delay:.21s}
+.project-index .project-row:nth-child(5){transition-delay:.28s}
 .career-list article:nth-child(2){transition-delay:.05s}
 .career-list article:nth-child(3){transition-delay:.1s}
 .career-list article:nth-child(4){transition-delay:.15s}

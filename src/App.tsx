@@ -6,6 +6,7 @@ const projects = [
   { name: "WYN Intelligence", field: "Commercial real estate", status: "In production", summary: "A broker command center that joins listings, campaigns, follow-up, and deal activity in one operating record.", role: "Product strategy, workflow design, AI layer, implementation" },
   { name: "Miguel Closes", field: "Real estate growth", status: "Live", summary: "A public website and GoHighLevel pipeline that captures, nurtures, and books while the agent is in the field.", role: "Site, funnel, CRM workflow, nurture, booking", href: "https://miguelcloses.com" },
   { name: "Neurospark", field: "Founder venture", status: "Live", summary: "An AI marketing company building agents that live in a client stack and ship useful work around the clock.", role: "Founder, brand, agent architecture, delivery systems", href: "https://neurosparkmarketing.com" },
+  { name: "Cortez Landscaping", field: "Local business growth", status: "Live", summary: "A cinematic lead-generation website for a family-owned Twin Cities landscaping company, built to turn project proof into estimate requests.", role: "Brand direction, website design, media system, performance, conversion path", href: "https://cortez-landscaping.vercel.app" },
   { name: "MicroCommit", field: "AI product lab", status: "iOS build", summary: "An adaptive habit product testing AI coaching, behavioral loops, and community accountability.", role: "Product design, application build, behavioral model, AI coach" },
 ];
 const record = [
