@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "three": "^0.185.1"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
-    "@types/three": "^0.185.0",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.1",
     "oxlint": "^1.71.0",
     "playwright": "^1.61.1",
     "typescript": "~6.0.2",
