@@ -1,10 +1,10 @@
 import type { ScrollScrubScene, ScrollScrubTheme } from "./components/scroll-scrub/scroll-scrub";
 
 export const scrollScrubTheme: ScrollScrubTheme = {
-  accent: "#C58A9B",
-  background: "#170F1C",
-  ink: "#F3EEE8",
-  muted: "#A79DAE",
+  accent: "var(--scarlet-red)",
+  background: "var(--egyptian-blue)",
+  ink: "var(--ink)",
+  muted: "var(--muted)",
 };
 
 export const scrollScrubScenes: ScrollScrubScene[] = [
