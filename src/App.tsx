@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { ScrollScrub } from "./components/scroll-scrub/scroll-scrub";
+import { WynCaseStudy } from "./WynCaseStudy";
 import { LegalPage } from "./LegalPage";
 import { scrollScrubScenes, scrollScrubTheme } from "./scroll-scrub-scenes";
 
 const projects = [
-  { name: "WYN Intelligence", field: "Commercial real estate", status: "In production", summary: "A broker command center that joins listings, campaigns, follow-up, and deal activity in one operating record.", role: "Product strategy, workflow design, AI layer, implementation" },
+  { name: "WYN Intelligence", caseStudy: true, field: "Commercial real estate", status: "In production", summary: "A broker command center that joins listings, campaigns, follow-up, and deal activity in one operating record.", role: "Product strategy, workflow design, AI layer, implementation" },
   { name: "Miguel Closes", field: "Real estate growth", status: "Live", summary: "A public website and GoHighLevel pipeline that captures, nurtures, and books while the agent is in the field.", role: "Site, funnel, CRM workflow, nurture, booking", href: "https://miguelcloses.com" },
   { name: "Neurospark", field: "Founder venture", status: "Live", summary: "An AI marketing company building agents that live in a client stack and ship useful work around the clock.", role: "Founder, brand, agent architecture, delivery systems", href: "https://neurosparkmarketing.com" },
   { name: "Cortez Landscaping", field: "Local business growth", status: "Live", summary: "A cinematic lead-generation website for a family-owned Twin Cities landscaping company, built to turn project proof into estimate requests.", role: "Brand direction, website design, media system, performance, conversion path", href: "https://cortez-landscaping.vercel.app" },
@@ -127,6 +128,7 @@ function PortfolioPage() {
           event.currentTarget.style.setProperty("--spot-y", String(event.clientY - rect.top) + "px");
         }}>
           <div className="project-meta"><span>{project.field}</span><em>{project.status}</em></div><h3>{project.name}</h3><p>{project.summary}</p><small>{project.role}</small>
+          {project.caseStudy && <WynCaseStudy />}
           {project.href ? <a href={project.href} target="_blank" rel="noreferrer">Visit live site</a> : null}
         </article>)}</div>
       </div>
@@ -142,7 +144,7 @@ function PortfolioPage() {
     </section>
     <section className="contact-section" id="contact" aria-labelledby="contact-title">
       <img src="/assets/contact-plate.png" alt="A luminous signal arriving at its final aperture" loading="lazy" />
-      <div className="contact-copy"><p>Start with the first broken handoff.</p><h2 id="contact-title">Map your pipeline.</h2><a href="mailto:danilo@neurosparkmarketing.com">Start a conversation</a></div>
+      <div className="contact-copy"><p>Start with the first broken handoff.</p><h2 id="contact-title">Map your pipeline.</h2><a href="mailto:danilo@neurosparkmarketing.com?subject=My%20pipeline&body=Here%E2%80%99s%20where%20our%20follow-up%20breaks%20down%3A%20">Email Danilo about my pipeline</a></div>
     </section>
     <footer><p>Danilo Ojeda</p><nav aria-label="Footer links"><a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com/dloojeda" target="_blank" rel="noreferrer">Facebook</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav><small>AI systems for commercial real estate</small></footer>
   </main>;

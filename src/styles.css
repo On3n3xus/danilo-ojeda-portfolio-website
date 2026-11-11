@@ -88,3 +88,14 @@ footer{min-height:160px;padding:34px clamp(24px,6vw,96px);display:grid;grid-temp
 }
 .section-heading h2, .record-column > h2, .legal-hero h1 { color: var(--stone-blue); }
 .practice-section :focus-visible { outline-color: var(--egyptian-blue); }
+
+
+.wyn-case-study { position: relative; margin-top: 24px; }
+.wyn-case-study summary { cursor: pointer; color: var(--stone-blue); font-weight: 600; line-height: 1.5; }
+.wyn-case-study[open] summary { margin-bottom: 16px; }
+.wyn-case-study summary:focus-visible { outline-offset: -2px; }
+.wyn-case-study p + p { margin-top: 12px; }
+.wyn-case-study figure { margin: 20px 0; }
+.wyn-case-study img { width: 100%; height: auto; border-radius: 8px; }
+.wyn-case-study figcaption { margin-top: 8px; color: var(--muted); font: 400 11px/1.5 var(--mono); }
+.project-row:hover .wyn-case-study p { transform: none; }

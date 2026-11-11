@@ -16,7 +16,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     body: "Danilo Ojeda builds the path from first inquiry to booked meeting.",
     tags: ["Inquiry", "Voice", "Intent", "CRM", "Follow-up", "Meeting"],
     clip: "/assets/living-signal-desktop.mp4",
-    mobileClip: "/assets/living-signal-mobile.mp4",
+    mobileClip: "/assets/living-signal-mobile-v2.mp4",
     poster: "/assets/living-signal-desktop.jpg",
     mobilePoster: "/assets/living-signal-mobile.jpg",
     objectPosition: "50% 50%",
