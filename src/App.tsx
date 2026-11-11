@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ScrollScrub } from "./components/scroll-scrub/scroll-scrub";
+import { LegalPage } from "./LegalPage";
 import { scrollScrubScenes, scrollScrubTheme } from "./scroll-scrub-scenes";
 
 const projects = [
@@ -102,7 +103,7 @@ function usePageMotion() {
   }, []);
 }
 
-export default function App() {
+function PortfolioPage() {
   usePageMotion();
 
   return <main className="site-shell">
@@ -143,6 +144,15 @@ export default function App() {
       <img src="/assets/contact-plate.png" alt="A luminous signal arriving at its final aperture" loading="lazy" />
       <div className="contact-copy"><p>Start with the first broken handoff.</p><h2 id="contact-title">Map your pipeline.</h2><a href="mailto:danilo@neurosparkmarketing.com">Start a conversation</a></div>
     </section>
-    <footer><p>Danilo Ojeda</p><nav aria-label="Social links"><a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com/dloojeda" target="_blank" rel="noreferrer">Facebook</a></nav><small>AI systems for commercial real estate</small></footer>
+    <footer><p>Danilo Ojeda</p><nav aria-label="Footer links"><a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com/dloojeda" target="_blank" rel="noreferrer">Facebook</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav><small>AI systems for commercial real estate</small></footer>
   </main>;
+}
+
+export default function App() {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  if (path === "/privacy" || path === "/privacy-policy") return <LegalPage kind="privacy" />;
+  if (path === "/terms" || path === "/terms-of-use") return <LegalPage kind="terms" />;
+
+  return <PortfolioPage />;
 }
