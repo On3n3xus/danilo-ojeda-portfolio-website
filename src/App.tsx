@@ -1,15 +1,10 @@
 import { useEffect } from "react";
 import { ScrollScrub } from "./components/scroll-scrub/scroll-scrub";
+import { ContactInquiry, NarratedIntroduction } from "./components/PortfolioExperience";
+import { ProjectShowcase } from "./components/ProjectShowcase";
 import { LegalPage } from "./LegalPage";
 import { scrollScrubScenes, scrollScrubTheme } from "./scroll-scrub-scenes";
 
-const projects = [
-  { name: "WYN Intelligence", field: "Commercial real estate", status: "In production", summary: "A broker command center that joins listings, campaigns, follow-up, and deal activity in one operating record.", role: "Product strategy, workflow design, AI layer, implementation" },
-  { name: "Miguel Closes", field: "Real estate growth", status: "Live", summary: "A public website and GoHighLevel pipeline that captures, nurtures, and books while the agent is in the field.", role: "Site, funnel, CRM workflow, nurture, booking", href: "https://miguelcloses.com" },
-  { name: "Neurospark", field: "Founder venture", status: "Live", summary: "An AI marketing company building agents that live in a client stack and ship useful work around the clock.", role: "Founder, brand, agent architecture, delivery systems", href: "https://neurosparkmarketing.com" },
-  { name: "Cortez Landscaping", field: "Local business growth", status: "Live", summary: "A cinematic lead-generation website for a family-owned Twin Cities landscaping company, built to turn project proof into estimate requests.", role: "Brand direction, website design, media system, performance, conversion path", href: "https://cortez-landscaping.vercel.app" },
-  { name: "MicroCommit", field: "AI product lab", status: "iOS build", summary: "An adaptive habit product testing AI coaching, behavioral loops, and community accountability.", role: "Product design, application build, behavioral model, AI coach" },
-];
 const record = [
   ["2026 to now", "WYN Group", "AI Growth and Innovation Manager"],
   ["2024 to now", "Optum", "Cybersecurity Analyst, IAM and PAM"],
@@ -117,23 +112,10 @@ function PortfolioPage() {
       <ScrollScrub scenes={scrollScrubScenes} theme={scrollScrubTheme} />
       <div className="journey-key" aria-label="The lead journey"><span>Signal</span><i/><span>Voice</span><i/><span>Intent</span><i/><span>CRM</span><i/><span>Booked</span></div>
     </div>
-    <section className="project-section" id="work" aria-labelledby="work-title">
-      <div className="section-heading reveal-target" data-reveal><p>Selected systems</p><h2 id="work-title">The work is the interface.</h2><span>Each system connects a real operating problem to a working path.</span></div>
-      <div className="project-canvas">
-        <figure className="project-plate reveal-target" data-reveal><img src="/assets/projects-plate.png" alt="Abstract liquid system map in the Living Signal visual language" loading="lazy" /></figure>
-        <div className="project-index">{projects.map((project) => <article className="project-row reveal-target" data-reveal key={project.name} onPointerMove={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          event.currentTarget.style.setProperty("--spot-x", String(event.clientX - rect.left) + "px");
-          event.currentTarget.style.setProperty("--spot-y", String(event.clientY - rect.top) + "px");
-        }}>
-          <div className="project-meta"><span>{project.field}</span><em>{project.status}</em></div><h3>{project.name}</h3><p>{project.summary}</p><small>{project.role}</small>
-          {project.href ? <a href={project.href} target="_blank" rel="noreferrer">Visit live site</a> : null}
-        </article>)}</div>
-      </div>
-    </section>
+    <ProjectShowcase />
     <section className="record-section" id="record" aria-labelledby="record-title">
       <div className="portrait-column reveal-target" data-reveal><figure className="portrait-frame"><img src="/assets/danilo-headshot.webp" alt="Danilo Ojeda" loading="lazy" /><figcaption>Minneapolis, Minnesota</figcaption></figure><p>Eleven years in identity, privileged access, and enterprise security shape how every automation gets designed.</p></div>
-      <div className="record-column"><p className="section-label reveal-target" data-reveal>Operating record</p><h2 id="record-title" className="reveal-target" data-reveal>Built with respect for access, data, and failure.</h2><div className="career-list">{record.map(([period, company, role]) => <article className="reveal-target" data-reveal key={period + "-" + company}><time>{period}</time><h3>{company}</h3><p>{role}</p></article>)}</div></div>
+      <div className="record-column"><p className="section-label reveal-target" data-reveal>Operating record</p><h2 id="record-title" className="reveal-target" data-reveal>Built with respect for access, data, and failure.</h2><NarratedIntroduction /><div className="career-list">{record.map(([period, company, role]) => <article className="reveal-target" data-reveal key={period + "-" + company}><time>{period}</time><h3>{company}</h3><p>{role}</p></article>)}</div></div>
     </section>
     <section className="practice-section" aria-labelledby="practice-title">
       <img className="practice-icons reveal-target" data-reveal src="/assets/signal-icons.png" alt="Custom icons for capture, voice, intent, routing, and meeting" loading="lazy" />
@@ -142,7 +124,7 @@ function PortfolioPage() {
     </section>
     <section className="contact-section" id="contact" aria-labelledby="contact-title">
       <img src="/assets/contact-plate.png" alt="A luminous signal arriving at its final aperture" loading="lazy" />
-      <div className="contact-copy"><p>Start with the first broken handoff.</p><h2 id="contact-title">Map your pipeline.</h2><a href="mailto:danilo@neurosparkmarketing.com">Start a conversation</a></div>
+      <div className="contact-copy"><p>Start with the first broken handoff.</p><h2 id="contact-title">Map your pipeline.</h2><ContactInquiry /></div>
     </section>
     <footer><p>Danilo Ojeda</p><nav aria-label="Footer links"><a href="https://www.linkedin.com/in/daniloojeda/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/daniloojeda_/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com/dloojeda" target="_blank" rel="noreferrer">Facebook</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav><small>AI systems for commercial real estate</small></footer>
   </main>;
