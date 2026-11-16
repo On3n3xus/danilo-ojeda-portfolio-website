@@ -8,7 +8,7 @@ export function NarratedIntroduction() {
   return <section className="narrated-introduction" aria-labelledby="introduction-title">
     <h3 id="introduction-title">Meet Danilo</h3>
     <p>A short introduction to the person behind the projects.</p>
-    <audio controls preload="none" aria-label="Narrated introduction to Danilo Ojeda" onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} src="/media/introduction.mp3" />
+    <audio controls preload="none" aria-label="Narrated introduction to Danilo Ojeda" onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} src="/media/introduction-frank.mp3" />
     <p className="intro-caption" aria-label="Current narration caption">{caption ?? "Play the introduction to hear the narration. Captions appear here."}</p>
     <p className="media-disclosure">Draft introduction with a synthetic narrator. This is not Danilo’s recorded voice.</p>
     <details className="media-transcript"><summary>Read introduction transcript</summary>{introCues.map(cue => <p key={cue.start}>{cue.text}</p>)}</details>
